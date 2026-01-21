@@ -1,0 +1,107 @@
+service: pollen-paw-backend
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+  stage: ${opt:stage, 'dev'}
+  
+  environment:
+    DB_HOST: ${env:DB_HOST}
+    DB_PORT: ${env:DB_PORT}
+    DB_NAME: ${env:DB_NAME}
+    DB_USER: ${env:DB_USER}
+    DB_PASSWORD: ${env:DB_PASSWORD}
+    S3_BUCKET: ${env:S3_BUCKET}
+    TOMORROW_IO_API_KEY: ${env:TOMORROW_IO_API_KEY}
+    CLAUDE_API_KEY: ${env:CLAUDE_API_KEY}
+    JWT_SECRET: ${env:JWT_SECRET}
+    JWT_EXPIRES_IN: ${env:JWT_EXPIRES_IN}
+  
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - s3:PutObject
+            - s3:GetObject
+            - s3:DeleteObject
+          Resource: "arn:aws:s3:::${env:S3_BUCKET}/*"
+
+functions:
+  # Auth
+  register:
+    handler: dist/handlers/auth/register.handler
+    events:
+      - http:
+          path: auth/register
+          method: post
+          cors: true
+
+  login:
+    handler: dist/handlers/auth/login.handler
+    events:
+      - http:
+          path: auth/login
+          method: post
+          cors: true
+
+  # Pets
+  createPet:
+    handler: dist/handlers/pets/createPet.handler
+    events:
+      - http:
+          path: pets
+          method: post
+          cors: true
+
+  getPets:
+    handler: dist/handlers/pets/getPets.handler
+    events:
+      - http:
+          path: pets
+          method: get
+          cors: true
+
+  updatePet:
+    handler: dist/handlers/pets/updatePet.handler
+    events:
+      - http:
+          path: pets/{id}
+          method: put
+          cors: true
+
+  deletePet:
+    handler: dist/handlers/pets/deletePet.handler
+    events:
+      - http:
+          path: pets/{id}
+          method: delete
+          cors: true
+
+  # Symptoms
+  logSymptom:
+    handler: dist/handlers/symptoms/logSymptom.handler
+    events:
+      - http:
+          path: symptoms
+          method: post
+          cors: true
+
+  getSymptoms:
+    handler: dist/handlers/symptoms/getSymptoms.handler
+    events:
+      - http:
+          path: symptoms
+          method: get
+          cors: true
+
+plugins:
+  - serverless-plugin-typescript
+  - serverless-offline
+
+custom:
+  serverless-offline:
+    httpPort: 3000
