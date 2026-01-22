@@ -45,6 +45,15 @@ function App() {
     }
   };
 
+  const getPollenLevelClass = (level: string) => {
+    switch (level) {
+      case 'VERY_HIGH': return 'pollen-level pollen-level-very-high';
+      case 'HIGH': return 'pollen-level pollen-level-high';
+      case 'MODERATE': return 'pollen-level pollen-level-moderate';
+      default: return 'pollen-level pollen-level-low';
+    }
+  };
+
   return (
     <div className="App">
       <header className="App-header">
@@ -52,28 +61,19 @@ function App() {
         <p>Check pollen levels in your area</p>
 
         {/* Input Box */}
-        <div style={{ margin: '20px' }}>
+        <div className="search-container">
           <input
             type="text"
+            className="search-input"
             placeholder="Enter ZIP code (e.g., 98074)"
             value={zipCode}
             onChange={(e) => setZipCode(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-            style={{
-              padding: '10px',
-              fontSize: '16px',
-              width: '200px',
-              marginRight: '10px'
-            }}
           />
           <button
+            className="search-button"
             onClick={handleSearch}
             disabled={loading}
-            style={{
-              padding: '10px 20px',
-              fontSize: '16px',
-              cursor: loading ? 'not-allowed' : 'pointer'
-            }}
           >
             {loading ? 'Loading...' : 'Search'}
           </button>
@@ -81,37 +81,35 @@ function App() {
 
         {/* Error Message */}
         {error && (
-          <div style={{ color: 'red', margin: '10px' }}>
+          <div className="error-message">
             ❌ {error}
           </div>
         )}
 
         {/* Display Pollen Data */}
         {pollenData && (
-          <div style={{ marginTop: '30px', textAlign: 'left', maxWidth: '600px' }}>
-            <h2>📍 {pollenData.location} ({pollenData.zipCode})</h2>
-            <h3>5-Day Pollen Forecast:</h3>
+          <div className="results-container">
+            <h2 className="location-title">
+              📍 {pollenData.location} ({pollenData.zipCode})
+            </h2>
+            <h3 className="forecast-title">5-Day Pollen Forecast:</h3>
             
-            {pollenData.forecast.map((day, index) => (
-              <div
-                key={index}
-                style={{
-                  background: '#f0f0f0',
-                  padding: '15px',
-                  margin: '10px 0',
-                  borderRadius: '8px',
-                  color: '#333'
-                }}
-              >
-                <h4>{day.date} - {day.pollenLevel}</h4>
-                <p>🌾 Grass: {day.grassPollen}/10</p>
-                <p>🌳 Tree: {day.treePollen}/10</p>
-                <p>🌿 Weed: {day.weedPollen}/10</p>
-                <p style={{ fontStyle: 'italic', color: '#666' }}>
-                  💡 {day.recommendation}
-                </p>
-              </div>
-            ))}
+            <div className="forecast-grid">
+              {pollenData.forecast.map((day, index) => (
+                <div key={index} className="pollen-card">
+                  <h4 className="pollen-date">{day.date}</h4>
+                  <p className={getPollenLevelClass(day.pollenLevel)}>
+                    {day.pollenLevel}
+                  </p>
+                  <p className="pollen-detail">🌾 Grass: {day.grassPollen}/10</p>
+                  <p className="pollen-detail">🌳 Tree: {day.treePollen}/10</p>
+                  <p className="pollen-detail">🌿 Weed: {day.weedPollen}/10</p>
+                  <p className="pollen-recommendation">
+                    💡 {day.recommendation}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </header>
