@@ -1,107 +1,80 @@
 service: pollen-paw-backend
-
-frameworkVersion: '3'
+useDotenv: true
 
 provider:
   name: aws
-  runtime: nodejs18.x
-  region: us-east-1
+  runtime: nodejs20.x  # Using the most stable LTS version for AWS Lambda compatibility
+  region: us-east-2    # Your specified AWS region
   stage: ${opt:stage, 'dev'}
+  profile: pollen-paw
   
+  # Explicitly enable loading of environment variables from .env file
+
+  # Mapping environment variables from .env to the Lambda execution environment
   environment:
+    GOOGLE_MAPS_API_KEY: ${env:GOOGLE_MAPS_API_KEY}
     DB_HOST: ${env:DB_HOST}
     DB_PORT: ${env:DB_PORT}
     DB_NAME: ${env:DB_NAME}
     DB_USER: ${env:DB_USER}
     DB_PASSWORD: ${env:DB_PASSWORD}
+    # AWS_REGION_CUSTOM: ${env:AWS_REGION}
     S3_BUCKET: ${env:S3_BUCKET}
-    TOMORROW_IO_API_KEY: ${env:TOMORROW_IO_API_KEY}
-    CLAUDE_API_KEY: ${env:CLAUDE_API_KEY}
     JWT_SECRET: ${env:JWT_SECRET}
     JWT_EXPIRES_IN: ${env:JWT_EXPIRES_IN}
-  
+    NODE_ENV: ${env:NODE_ENV}
+
+  # IAM Role permissions for the Lambda functions
   iam:
     role:
       statements:
         - Effect: Allow
           Action:
-            - s3:PutObject
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+          Resource: '*'
+        - Effect: Allow
+          Action:
             - s3:GetObject
-            - s3:DeleteObject
-          Resource: "arn:aws:s3:::${env:S3_BUCKET}/*"
+            - s3:PutObject
+          Resource: 
+            - "arn:aws:s3:::${env:S3_BUCKET}/*"
+            - "arn:aws:s3:::${env:S3_BUCKET}"
 
+# Function definitions
 functions:
-  # Auth
-  register:
-    handler: dist/handlers/auth/register.handler
+  getPollenData:
+    handler: src/handlers/environmental/getPollenData.handler
+    description: Retrieves pollen forecast data from the Google Pollen API
+    timeout: 30
+    memorySize: 256
     events:
       - http:
-          path: auth/register
-          method: post
-          cors: true
-
-  login:
-    handler: dist/handlers/auth/login.handler
-    events:
-      - http:
-          path: auth/login
-          method: post
-          cors: true
-
-  # Pets
-  createPet:
-    handler: dist/handlers/pets/createPet.handler
-    events:
-      - http:
-          path: pets
-          method: post
-          cors: true
-
-  getPets:
-    handler: dist/handlers/pets/getPets.handler
-    events:
-      - http:
-          path: pets
+          path: environmental/pollen
           method: get
           cors: true
 
-  updatePet:
-    handler: dist/handlers/pets/updatePet.handler
-    events:
-      - http:
-          path: pets/{id}
-          method: put
-          cors: true
-
-  deletePet:
-    handler: dist/handlers/pets/deletePet.handler
-    events:
-      - http:
-          path: pets/{id}
-          method: delete
-          cors: true
-
-  # Symptoms
-  logSymptom:
-    handler: dist/handlers/symptoms/logSymptom.handler
-    events:
-      - http:
-          path: symptoms
-          method: post
-          cors: true
-
-  getSymptoms:
-    handler: dist/handlers/symptoms/getSymptoms.handler
-    events:
-      - http:
-          path: symptoms
-          method: get
-          cors: true
-
+# Plugin configuration
 plugins:
-  - serverless-plugin-typescript
-  - serverless-offline
+  - serverless-esbuild        # Modern, fast bundler for TypeScript compatibility
+  - serverless-dotenv-plugin  # Automatically injects .env variables into the deployment
+  - serverless-offline        # Enables local development testing
 
+# Configuration for plugins
 custom:
+  esbuild:
+    bundle: true              # Bundles all dependencies into a single file
+    minify: true              # Reduces code size for faster cold starts
+    sourcemap: true           # Enables easier debugging in CloudWatch
+    exclude: ['aws-sdk']     # Prevents bundling AWS SDK as it is pre-installed on Lambda
+    target: 'node20'          # Matches the provider runtime
+    platform: 'node'
+  
   serverless-offline:
-    httpPort: 3000
+    httpPort: 3000            # Local API endpoint port
+    lambdaPort: 3002
+
+# Packaging settings
+package:
+  individually: true          # Bundles each function separately to minimize package size
