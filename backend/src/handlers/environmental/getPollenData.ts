@@ -2,45 +2,29 @@ import { APIGatewayProxyHandler } from 'aws-lambda';
 import axios from 'axios';
 
 /**
- * Static ZIP code to coordinates mapping for the Seattle area.
- * In a real-world scenario, this could be extended with a Geocoding API.
+ *  Google Geocoding API Response
  */
-const zipCodeMap: Record<string, { lat: number; lon: number; city: string }> = {
-  '98074': { lat: 47.6149, lon: -122.0326, city: 'Sammamish, WA' },
-  '98052': { lat: 47.6740, lon: -122.1215, city: 'Redmond, WA' },
-  '98004': { lat: 47.6144, lon: -122.2090, city: 'Bellevue, WA' },
-  '98033': { lat: 47.6770, lon: -122.1903, city: 'Kirkland, WA' },
-  '98109': { lat: 47.6376, lon: -122.3465, city: 'Seattle, WA' },
-  '33101': { lat: 25.7617, lon: -80.1918, city: 'Miami, FL' },
-};
+interface GeocodingResponse {
+  results: Array<{
+    geometry: {
+      location: {
+        lat: number;
+        lng: number;
+      };
+    };
+    formatted_address: string;
+  }>;
+  status: string;
+}
 
+/**
+ *  Google Pollen API Response
+ */
 interface GooglePollenResponse {
   regionCode: string;
   dailyInfo: Array<{
-    date: {
-      year: number;
-      month: number;
-      day: number;
-    };
+    date: { year: number; month: number; day: number };
     pollenTypeInfo: Array<{
-      code: string; // e.g., "GRASS", "TREE", "WEED"
-      displayName: string;
-      inSeason: boolean;
-      indexInfo?: {
-        code: string;
-        displayName: string;
-        value: number; // 0-5 index
-        category: string; // e.g., "Very Low", "High"
-        indexDescription: string;
-        color: {
-          red?: number;
-          green?: number;
-          blue?: number;
-        };
-      };
-      healthRecommendations?: string[];
-    }>;
-    plantInfo?: Array<{
       code: string;
       displayName: string;
       inSeason: boolean;
@@ -48,56 +32,65 @@ interface GooglePollenResponse {
         value: number;
         category: string;
       };
+      healthRecommendations?: string[];
     }>;
   }>;
 }
 
+// Lambda Handler
 export const handler: APIGatewayProxyHandler = async (event) => {
   console.log('Received Lambda Event:', JSON.stringify(event, null, 2));
 
   try {
     const zipCode = event.queryStringParameters?.zipCode;
+    const apiKey = process.env.GOOGLE_MAPS_API_KEY;
 
-    // Validate Input
+    // 1. Validation 
+    // Ensure both the user input and the server configuration are present
     if (!zipCode) {
       return {
         statusCode: 400,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
         body: JSON.stringify({ error: 'zipCode parameter is required' }),
       };
     }
 
-    const coords = zipCodeMap[zipCode];
-    if (!coords) {
-      return {
-        statusCode: 400,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
-        body: JSON.stringify({
-          error: `ZIP code ${zipCode} is not currently supported. Supported ZIP codes: ${Object.keys(zipCodeMap).join(', ')}`,
-        }),
-      };
-    }
-
-    const apiKey = process.env.GOOGLE_MAPS_API_KEY;
     if (!apiKey) {
       throw new Error('GOOGLE_MAPS_API_KEY is not defined in environment variables');
     }
 
-    console.log(`Querying Google Pollen API for ZIP: ${zipCode} at (${coords.lat}, ${coords.lon})`);
+    // 2. Geocoding 
+    // Convert the ZIP code into Latitude and Longitude using Google Geocoding API
+    console.log(`Converting ZIP code ${zipCode} to coordinates...`);
+    const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json`;
+    const geoResponse = await axios.get<GeocodingResponse>(geocodeUrl, {
+      params: {
+        address: zipCode,
+        key: apiKey,
+      },
+    });
 
-    // Fetch 5-day forecast from Google
-    const url = `https://pollen.googleapis.com/v1/forecast:lookup`;
-    const response = await axios.get<GooglePollenResponse>(url, {
+    // Handle cases where the ZIP code is invalid or not found
+    if (geoResponse.data.status !== 'OK' || !geoResponse.data.results[0]) {
+      return {
+        statusCode: 404,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({ error: `ZIP code ${zipCode} not found or invalid.` }),
+      };
+    }
+
+    const { lat, lng } = geoResponse.data.results[0].geometry.location;
+    const locationName = geoResponse.data.results[0].formatted_address;
+
+    // 3. Pollen API 
+    // Use the coordinates obtained from the Geocoding API to fetch pollen data
+    console.log(`Querying Pollen API for: ${locationName} (${lat}, ${lng})`);
+    const pollenUrl = `https://pollen.googleapis.com/v1/forecast:lookup`;
+    const pollenResponse = await axios.get<GooglePollenResponse>(pollenUrl, {
       params: {
         key: apiKey,
-        'location.latitude': coords.lat,
-        'location.longitude': coords.lon,
+        'location.latitude': lat,
+        'location.longitude': lng,
         days: 5,
         languageCode: 'en',
         plantsDescription: true,
@@ -105,20 +98,19 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       timeout: 10000,
     });
 
-    console.log('Google Raw Data:', JSON.stringify(response.data.dailyInfo[0], null, 2));
-
-    // Transform and Format the Response for Frontend Consumption
+    // 4. Data Transformation 
+    // Map the raw Google data into a simplified format for the frontend
     const formattedData = {
       zipCode,
-      location: coords.city,
-      regionCode: response.data.regionCode,
-      forecast: response.data.dailyInfo.map((day) => {
-        // 提取各类型花粉数据
+      location: locationName,
+      regionCode: pollenResponse.data.regionCode,
+      forecast: pollenResponse.data.dailyInfo.map((day) => {
+        // Extract specific pollen types
         const grassPollen = day.pollenTypeInfo.find(p => p.code === 'GRASS');
         const treePollen = day.pollenTypeInfo.find(p => p.code === 'TREE');
         const weedPollen = day.pollenTypeInfo.find(p => p.code === 'WEED');
         
-        // 计算总体花粉等级
+        // Determine the overall risk level based on the highest index value
         const maxValue = Math.max(
           grassPollen?.indexInfo?.value ?? 0,
           treePollen?.indexInfo?.value ?? 0,
@@ -144,6 +136,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       },
     };
 
+    // 5. Success Response
     return {
       statusCode: 200,
       headers: {
@@ -154,12 +147,12 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     };
 
   } catch (error: any) {
+    // 6. Error Handling
     console.error('Error in getPollenData handler:', error);
 
     let errorMessage = 'An internal server error occurred';
     let statusCode = 500;
 
-    // Comprehensive Error Handling for Axios/External API issues
     if (axios.isAxiosError(error)) {
       errorMessage = `External API Error: ${error.response?.data ? JSON.stringify(error.response.data) : error.message}`;
       statusCode = error.response?.status || 500;
@@ -173,10 +166,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
       },
-      body: JSON.stringify({
-        error: errorMessage,
-        zipCode: event.queryStringParameters?.zipCode,
-      }),
+      body: JSON.stringify({ error: errorMessage, zipCode: event.queryStringParameters?.zipCode }),
     };
   }
 };
