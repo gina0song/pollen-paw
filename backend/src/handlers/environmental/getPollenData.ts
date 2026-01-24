@@ -95,7 +95,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         languageCode: 'en',
         plantsDescription: true,
       },
-      timeout: 10000,
+      timeout: 10000, 
     });
 
     // 4. Data Transformation 

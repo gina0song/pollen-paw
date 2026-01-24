@@ -1,15 +1,14 @@
 service: pollen-paw-backend
 useDotenv: true
 
+# AWS provider configuration
 provider:
   name: aws
-  runtime: nodejs20.x  # Using the most stable LTS version for AWS Lambda compatibility
-  region: us-east-2    # Your specified AWS region
+  runtime: nodejs20.x  
+  region: us-east-2    
   stage: ${opt:stage, 'dev'}
   profile: pollen-paw
   
-  # Explicitly enable loading of environment variables from .env file
-
   # Mapping environment variables from .env to the Lambda execution environment
   environment:
     GOOGLE_MAPS_API_KEY: ${env:GOOGLE_MAPS_API_KEY}
@@ -18,13 +17,13 @@ provider:
     DB_NAME: ${env:DB_NAME}
     DB_USER: ${env:DB_USER}
     DB_PASSWORD: ${env:DB_PASSWORD}
-    # AWS_REGION_CUSTOM: ${env:AWS_REGION}
     S3_BUCKET: ${env:S3_BUCKET}
     JWT_SECRET: ${env:JWT_SECRET}
     JWT_EXPIRES_IN: ${env:JWT_EXPIRES_IN}
     NODE_ENV: ${env:NODE_ENV}
 
-  # IAM Role permissions for the Lambda functions
+  # AWS Identity and Access Management (IAM) permissions for the Lambda functions
+  # Defines what AWS services this Lambda function can access
   iam:
     role:
       statements:
@@ -42,11 +41,11 @@ provider:
             - "arn:aws:s3:::${env:S3_BUCKET}/*"
             - "arn:aws:s3:::${env:S3_BUCKET}"
 
-# Function definitions
+# lambda function definitions and configurations
 functions:
   getPollenData:
     handler: src/handlers/environmental/getPollenData.handler
-    description: Retrieves pollen forecast data from the Google Pollen API
+    description: Retrieves pollen forecast data from the Google Pollen API 
     timeout: 30
     memorySize: 256
     events:
@@ -55,11 +54,11 @@ functions:
           method: get
           cors: true
 
-# Plugin configuration
+# external Serverless Framework plugins
 plugins:
-  - serverless-esbuild        # Modern, fast bundler for TypeScript compatibility
-  - serverless-dotenv-plugin  # Automatically injects .env variables into the deployment
-  - serverless-offline        # Enables local development testing
+  - serverless-esbuild        # compiles TS to JS and bundles dependencies
+  - serverless-dotenv-plugin  # loads .env files and makes variables available
+  - serverless-offline        # allow AWS Lambda and API Gateway work locally
 
 # Configuration for plugins
 custom:
@@ -67,7 +66,7 @@ custom:
     bundle: true              # Bundles all dependencies into a single file
     minify: true              # Reduces code size for faster cold starts
     sourcemap: true           # Enables easier debugging in CloudWatch
-    exclude: ['aws-sdk']     # Prevents bundling AWS SDK as it is pre-installed on Lambda
+    exclude: ['aws-sdk']      # Prevents bundling AWS SDK as it is pre-installed on Lambda
     target: 'node20'          # Matches the provider runtime
     platform: 'node'
   
