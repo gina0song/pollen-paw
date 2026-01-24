@@ -2,6 +2,10 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import './App.css';
 
+/**
+ * Interface for a single day's pollen forecast
+ * Represents the transformed data structure from Lambda response
+ */
 interface PollenDay {
   date: string;
   pollenLevel: string;
@@ -11,37 +15,45 @@ interface PollenDay {
   recommendation: string;
 }
 
+/**
+ * Interface for the complete API response
+ * Matches the structure returned by Lambda function
+ */
 interface PollenResponse {
   zipCode: string;
-  location: string;
-  forecast: PollenDay[];
+  location: string; // Formatted address from Geocoding API
+  forecast: PollenDay[]; // Array of 5 days of pollen data
 }
 
-function App() {
-  const [zipCode, setZipCode] = useState('');
-  const [pollenData, setPollenData] = useState<PollenResponse | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
+function App() {
+  const [zipCode, setZipCode] = useState(''); // User's ZIP code input
+  const [pollenData, setPollenData] = useState<PollenResponse | null>(null); // API response data
+  const [loading, setLoading] = useState(false); // Loading state
+  const [error, setError] = useState(''); // Error message string 
+
+  // Function to handle search button click
   const handleSearch = async () => {
     if (!zipCode) {
       setError('Please enter a ZIP code');
       return;
     }
 
+    // Reset states before new search
     setLoading(true);
     setError('');
     setPollenData(null);
 
+    // Make HTTP GET request to Lambda API
     try {
       const response = await axios.get(
         `https://fhykriij99.execute-api.us-east-2.amazonaws.com/dev/environmental/pollen?zipCode=${zipCode}`
       );
-      setPollenData(response.data);
+      setPollenData(response.data); // Update state with API response data
     } catch (err: any) {
       setError(err.response?.data?.error || 'Failed to fetch pollen data');
     } finally {
-      setLoading(false);
+      setLoading(false); // Reset loading state
     }
   };
 
