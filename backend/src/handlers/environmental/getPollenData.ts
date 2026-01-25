@@ -4,7 +4,7 @@ import { calculatePollenLevel } from '../../utils/pollenCalculator';
 import { extractPollenValues, combineRecommendations } from '../../utils/pollenExtractor';
 import { formatApiDate } from '../../utils/dateFormatter';
 
-const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
+const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
 
 interface PollenForecast { // Define structure for daily pollen forecast
   date: string;
@@ -53,7 +53,7 @@ export const handler = async (
     const geocodingResponse = await axios.get(geocodingUrl, {
       params: {
         address: zipCode,
-        key: GOOGLE_API_KEY,
+        key: GOOGLE_MAPS_API_KEY,
       },
     });
     // Validate geocoding response
@@ -82,7 +82,7 @@ export const handler = async (
 
     // Step 2: Get pollen data using Pollen API
     console.log('Fetching pollen data for coordinates:', { lat, lng });
-    const pollenUrl = `https://pollen.googleapis.com/v1/forecast:lookup?key=${GOOGLE_API_KEY}&location.latitude=${lat}&location.longitude=${lng}&days=5`;
+    const pollenUrl = `https://pollen.googleapis.com/v1/forecast:lookup?key=${GOOGLE_MAPS_API_KEY}&location.latitude=${lat}&location.longitude=${lng}&days=5`;
 
     const pollenResponse = await axios.get(pollenUrl); // Fetch pollen data
     console.log('Pollen API response:', JSON.stringify(pollenResponse.data));

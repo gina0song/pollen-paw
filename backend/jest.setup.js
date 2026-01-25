@@ -18,5 +18,5 @@ if (typeof sessionStorage === 'undefined') {
 }
 
 // Set up test environment variables
-process.env.GOOGLE_API_KEY = 'test-api-key-12345';
+process.env.GOOGLE_MAPS_API_KEY = 'test-api-key-12345';
 process.env.NODE_ENV = 'test';

@@ -7,6 +7,19 @@ jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 describe('getPollenData - Mock API Tests', () => {
+  // Set up environment variable for tests
+  const originalEnv = process.env;
+
+  beforeAll(() => {
+    process.env = {
+      ...originalEnv,
+      GOOGLE_MAPS_API_KEY: 'test-api-key-12345',
+    };
+  });
+
+  afterAll(() => {
+    process.env = originalEnv;
+  });
   // Helper to create mock events
   const createMockEvent = (zipCode: string): APIGatewayProxyEvent => {
     return {
@@ -106,7 +119,7 @@ describe('getPollenData - Mock API Tests', () => {
         expect.objectContaining({
           params: expect.objectContaining({
             address: '98074',
-            key: expect.any(String),
+            key: 'test-api-key-12345',
           }),
         })
       );
