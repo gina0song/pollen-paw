@@ -1,4 +1,4 @@
-// Polyfill for localStorage to prevent Jest environment errors
+// Polyfill for localStorage
 if (typeof localStorage === 'undefined') {
   global.localStorage = {
     getItem: () => null,
@@ -16,3 +16,7 @@ if (typeof sessionStorage === 'undefined') {
     clear: () => {},
   };
 }
+
+// Set up test environment variables
+process.env.GOOGLE_API_KEY = 'test-api-key-12345';
+process.env.NODE_ENV = 'test';

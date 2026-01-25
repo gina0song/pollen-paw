@@ -1,172 +1,168 @@
-import { APIGatewayProxyHandler } from 'aws-lambda';
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import axios from 'axios';
+import { calculatePollenLevel } from '../../utils/pollenCalculator'; 
+import { extractPollenValues, combineRecommendations } from '../../utils/pollenExtractor';
+import { formatApiDate } from '../../utils/dateFormatter';
 
-/**
- *  Google Geocoding API Response
- */
-interface GeocodingResponse {
-  results: Array<{
-    geometry: {
-      location: {
-        lat: number;
-        lng: number;
-      };
-    };
-    formatted_address: string;
-  }>;
-  status: string;
+const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
+
+interface PollenForecast { // Define structure for daily pollen forecast
+  date: string;
+  grassPollen: number;
+  treePollen: number;
+  weedPollen: number;
+  pollenLevel: string;
+  healthRecommendations: string[];
 }
 
-/**
- *  Google Pollen API Response
- */
-interface GooglePollenResponse {
-  regionCode: string;
-  dailyInfo: Array<{
-    date: { year: number; month: number; day: number };
-    pollenTypeInfo: Array<{
-      code: string;
-      displayName: string;
-      inSeason: boolean;
-      indexInfo?: {
-        value: number;
-        category: string;
-      };
-      healthRecommendations?: string[];
-    }>;
-  }>;
+interface PollenResponse { // Define structure for the full API response
+  zipCode: string;
+  location: string;
+  coordinates: {
+    lat: number;
+    lng: number;
+  };
+  forecast: PollenForecast[];
 }
-
-// Lambda Handler
-export const handler: APIGatewayProxyHandler = async (event) => {
-  console.log('Received Lambda Event:', JSON.stringify(event, null, 2));
+// Lambda handler function to get pollen data based on ZIP code
+export const handler = async (
+  event: APIGatewayProxyEvent
+): Promise<APIGatewayProxyResult> => {
+  console.log('Received event:', JSON.stringify(event));
 
   try {
+    // Validate input
     const zipCode = event.queryStringParameters?.zipCode;
-    const apiKey = process.env.GOOGLE_MAPS_API_KEY;
-
-    // 1. Validation 
-    // Ensure both the user input and the server configuration are present
     if (!zipCode) {
       return {
         statusCode: 400,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-        body: JSON.stringify({ error: 'zipCode parameter is required' }),
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
+        body: JSON.stringify({
+          error: 'ZIP code is required',
+          message: 'Please provide a zipCode query parameter',
+        }),
       };
     }
 
-    if (!apiKey) {
-      throw new Error('GOOGLE_MAPS_API_KEY is not defined in environment variables');
-    }
-
-    // 2. Geocoding 
-    // Convert the ZIP code into Latitude and Longitude using Google Geocoding API
-    console.log(`Converting ZIP code ${zipCode} to coordinates...`);
-    const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json`;
-    const geoResponse = await axios.get<GeocodingResponse>(geocodeUrl, {
+    // Step 1: Get coordinates from ZIP code using Geocoding API
+    console.log('Fetching coordinates for ZIP code:', zipCode);
+    const geocodingUrl = 'https://maps.googleapis.com/maps/api/geocode/json';
+    const geocodingResponse = await axios.get(geocodingUrl, {
       params: {
         address: zipCode,
-        key: apiKey,
+        key: GOOGLE_API_KEY,
       },
     });
-
-    // Handle cases where the ZIP code is invalid or not found
-    if (geoResponse.data.status !== 'OK' || !geoResponse.data.results[0]) {
-      return {
+    // Validate geocoding response
+    if (
+      geocodingResponse.data.status !== 'OK' ||
+      !geocodingResponse.data.results.length
+    ) {
+      return { // Return 404 if ZIP code is invalid
         statusCode: 404,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-        body: JSON.stringify({ error: `ZIP code ${zipCode} not found or invalid.` }),
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
+        body: JSON.stringify({
+          error: 'Invalid ZIP code',
+          message: 'Could not find location for the provided ZIP code',
+        }),
       };
     }
+    // Extract latitude and longitude
+    const location = geocodingResponse.data.results[0];
+    const { lat, lng } = location.geometry.location;
+    const formattedAddress = location.formatted_address;
 
-    const { lat, lng } = geoResponse.data.results[0].geometry.location;
-    const locationName = geoResponse.data.results[0].formatted_address;
+    console.log('Coordinates found:', { lat, lng, formattedAddress });
 
-    // 3. Pollen API 
-    // Use the coordinates obtained from the Geocoding API to fetch pollen data
-    console.log(`Querying Pollen API for: ${locationName} (${lat}, ${lng})`);
-    const pollenUrl = `https://pollen.googleapis.com/v1/forecast:lookup`;
-    const pollenResponse = await axios.get<GooglePollenResponse>(pollenUrl, {
-      params: {
-        key: apiKey,
-        'location.latitude': lat,
-        'location.longitude': lng,
-        days: 5,
-        languageCode: 'en',
-        plantsDescription: true,
-      },
-      timeout: 10000, 
-    });
+    // Step 2: Get pollen data using Pollen API
+    console.log('Fetching pollen data for coordinates:', { lat, lng });
+    const pollenUrl = `https://pollen.googleapis.com/v1/forecast:lookup?key=${GOOGLE_API_KEY}&location.latitude=${lat}&location.longitude=${lng}&days=5`;
 
-    // 4. Data Transformation 
-    // Map the raw Google data into a simplified format for the frontend
-    const formattedData = {
-      zipCode,
-      location: locationName,
-      regionCode: pollenResponse.data.regionCode,
-      forecast: pollenResponse.data.dailyInfo.map((day) => {
-        // Extract specific pollen types
-        const grassPollen = day.pollenTypeInfo.find(p => p.code === 'GRASS');
-        const treePollen = day.pollenTypeInfo.find(p => p.code === 'TREE');
-        const weedPollen = day.pollenTypeInfo.find(p => p.code === 'WEED');
-        
-        // Determine the overall risk level based on the highest index value
-        const maxValue = Math.max(
-          grassPollen?.indexInfo?.value ?? 0,
-          treePollen?.indexInfo?.value ?? 0,
-          weedPollen?.indexInfo?.value ?? 0
+    const pollenResponse = await axios.get(pollenUrl); // Fetch pollen data
+    console.log('Pollen API response:', JSON.stringify(pollenResponse.data));
+
+    // Step 3: Transform data using utility functions
+    const forecast: PollenForecast[] = pollenResponse.data.dailyInfo.map(
+      (day: any) => {
+        // Extract pollen values using utility
+        const extracted = extractPollenValues(day.pollenTypeInfo);
+
+        // Calculate pollen level using utility
+        const pollenLevel = calculatePollenLevel(
+          extracted.grassPollen,
+          extracted.treePollen,
+          extracted.weedPollen
         );
-        
-        const pollenLevel = maxValue >= 4 ? 'VERY_HIGH' :
-                          maxValue >= 3 ? 'HIGH' :
-                          maxValue >= 2 ? 'MODERATE' : 'LOW';
-        
+
+        // Combine recommendations using utility
+        const healthRecommendations = combineRecommendations(extracted);
+
+        // Format date using utility
+        const formattedDate = formatApiDate(day.date);
+
         return {
-          date: `${day.date.year}-${String(day.date.month).padStart(2, '0')}-${String(day.date.day).padStart(2, '0')}`,
+          date: formattedDate,
+          grassPollen: extracted.grassPollen,
+          treePollen: extracted.treePollen,
+          weedPollen: extracted.weedPollen,
           pollenLevel,
-          grassPollen: grassPollen?.indexInfo?.value ?? 0,
-          treePollen: treePollen?.indexInfo?.value ?? 0,
-          weedPollen: weedPollen?.indexInfo?.value ?? 0,
-          recommendation: grassPollen?.healthRecommendations?.[0] ?? 'No specific recommendations',
+          healthRecommendations,
         };
-      }),
-      metadata: {
-        source: 'Google Maps Platform',
-        timestamp: new Date().toISOString(),
-      },
+      }
+    );
+
+    // Step 4: Return response
+    const response: PollenResponse = {
+      zipCode,
+      location: formattedAddress,
+      coordinates: { lat, lng },
+      forecast,
     };
 
-    // 5. Success Response
     return {
       statusCode: 200,
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
       },
-      body: JSON.stringify(formattedData),
+      body: JSON.stringify(response),
     };
-
   } catch (error: any) {
-    // 6. Error Handling
-    console.error('Error in getPollenData handler:', error);
+    console.error('Error fetching pollen data:', error);
 
-    let errorMessage = 'An internal server error occurred';
-    let statusCode = 500;
-
-    if (axios.isAxiosError(error)) {
-      errorMessage = `External API Error: ${error.response?.data ? JSON.stringify(error.response.data) : error.message}`;
-      statusCode = error.response?.status || 500;
-    } else if (error instanceof Error) {
-      errorMessage = error.message;
+    // Handle different error types
+    if (error.response) {
+      // API error
+      return {
+        statusCode: error.response.status || 500,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
+        body: JSON.stringify({
+          error: 'External API error',
+          message: error.response.data?.error?.message || 'Failed to fetch data from external API',
+        }),
+      };
     }
 
+    // Generic error
     return {
-      statusCode,
+      statusCode: 500,
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
       },
-      body: JSON.stringify({ error: errorMessage, zipCode: event.queryStringParameters?.zipCode }),
+      body: JSON.stringify({
+        error: 'Internal server error',
+        message: 'An unexpected error occurred while processing your request',
+      }),
     };
   }
 };

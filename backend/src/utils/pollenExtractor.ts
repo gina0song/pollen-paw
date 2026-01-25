@@ -18,7 +18,7 @@ export interface ExtractedPollenValues {
 // Function to extract pollen values and recommendations from pollenTypeInfo array
 export function extractPollenValues(
   pollenTypeInfo: PollenTypeInfo[]
-): ExtractedPollenValues {
+): ExtractedPollenValues { 
   const grass = pollenTypeInfo.find((p) => p.code === 'GRASS');
   const tree = pollenTypeInfo.find((p) => p.code === 'TREE');
   const weed = pollenTypeInfo.find((p) => p.code === 'WEED');
