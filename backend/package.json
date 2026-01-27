@@ -10,7 +10,7 @@
     "deploy:prod": "serverless deploy --stage prod --aws-profile pollen-paw",
     "logs": "serverless logs -f getPollenData --tail --aws-profile pollen-paw",
     "remove": "serverless remove --aws-profile pollen-paw",
-    "test": "jest",
+    "test": "jest --forceExit --detectOpenHandles",
     "test:jest": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
