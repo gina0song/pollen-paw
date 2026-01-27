@@ -9,7 +9,7 @@ provider:
   stage: ${opt:stage, 'dev'}
   profile: pollen-paw
   
-  # Mapping environment variables from .env to the Lambda execution environment
+  # Environment variables for Lambda functions
   environment:
     GOOGLE_MAPS_API_KEY: ${env:GOOGLE_MAPS_API_KEY}
     DB_HOST: ${env:DB_HOST}
@@ -21,9 +21,9 @@ provider:
     JWT_SECRET: ${env:JWT_SECRET}
     JWT_EXPIRES_IN: ${env:JWT_EXPIRES_IN}
     NODE_ENV: ${env:NODE_ENV}
+    AWS_REGION: ${env:AWS_REGION, 'us-east-2'}
 
-  # AWS Identity and Access Management (IAM) permissions for the Lambda functions
-  # Defines what AWS services this Lambda function can access
+  # IAM permissions for Lambda functions
   iam:
     role:
       statements:
@@ -37,15 +37,19 @@ provider:
           Action:
             - s3:GetObject
             - s3:PutObject
+            - s3:DeleteObject
           Resource: 
             - "arn:aws:s3:::${env:S3_BUCKET}/*"
             - "arn:aws:s3:::${env:S3_BUCKET}"
 
-# lambda function definitions and configurations
+# Lambda function definitions
 functions:
+  # ============================================
+  # Environmental Data API
+  # ============================================
   getPollenData:
     handler: src/handlers/environmental/getPollenData.handler
-    description: Retrieves pollen forecast data from the Google Pollen API 
+    description: Retrieves pollen forecast data from Google Pollen API 
     timeout: 30
     memorySize: 256
     events:
@@ -54,26 +58,145 @@ functions:
           method: get
           cors: true
 
-# external Serverless Framework plugins
-plugins:
-  - serverless-esbuild        # compiles TS to JS and bundles dependencies
-  - serverless-dotenv-plugin  # loads .env files and makes variables available
-  - serverless-offline        # allow AWS Lambda and API Gateway work locally
+  # ============================================
+  # Pet Management API
+  # ============================================
+  getPets:
+    handler: src/handlers/pets/getPets.handler
+    description: Fetch all pets for authenticated user
+    timeout: 10
+    memorySize: 256
+    events:
+      - http:
+          path: pets
+          method: get
+          cors: true
 
-# Configuration for plugins
+  getPet:
+    handler: src/handlers/pets/getPet.handler
+    description: Fetch single pet by ID
+    timeout: 10
+    memorySize: 256
+    events:
+      - http:
+          path: pets/{id}
+          method: get
+          cors: true
+
+  createPet:
+    handler: src/handlers/pets/createPet.handler
+    description: Create new pet profile
+    timeout: 10
+    memorySize: 256
+    events:
+      - http:
+          path: pets
+          method: post
+          cors: true
+
+  updatePet:
+    handler: src/handlers/pets/updatePet.handler
+    description: Update existing pet profile
+    timeout: 10
+    memorySize: 256
+    events:
+      - http:
+          path: pets/{id}
+          method: put
+          cors: true
+
+  deletePet:
+    handler: src/handlers/pets/deletePet.handler
+    description: Delete pet profile
+    timeout: 10
+    memorySize: 256
+    events:
+      - http:
+          path: pets/{id}
+          method: delete
+          cors: true
+
+  # ============================================
+  # Symptom Logging API
+  # ============================================
+  getSymptoms:
+    handler: src/handlers/symptoms/getSymptoms.handler
+    description: Fetch symptom logs for a pet
+    timeout: 10
+    memorySize: 256
+    events:
+      - http:
+          path: symptoms
+          method: get
+          cors: true
+
+  createSymptom:
+    handler: src/handlers/symptoms/createSymptom.handler
+    description: Create new symptom log
+    timeout: 10
+    memorySize: 256
+    events:
+      - http:
+          path: symptoms
+          method: post
+          cors: true
+
+  updateSymptom:
+    handler: src/handlers/symptoms/updateSymptom.handler
+    description: Update existing symptom log
+    timeout: 10
+    memorySize: 256
+    events:
+      - http:
+          path: symptoms/{id}
+          method: put
+          cors: true
+
+  deleteSymptom:
+    handler: src/handlers/symptoms/deleteSymptom.handler
+    description: Delete symptom log
+    timeout: 10
+    memorySize: 256
+    events:
+      - http:
+          path: symptoms/{id}
+          method: delete
+          cors: true
+
+  # ============================================
+  # File Upload API
+  # ============================================
+  uploadPhoto:
+    handler: src/handlers/upload/uploadPhoto.handler
+    description: Generate presigned URL for S3 photo upload
+    timeout: 10
+    memorySize: 256
+    events:
+      - http:
+          path: upload
+          method: post
+          cors: true
+
+# External plugins
+plugins:
+  - serverless-esbuild        
+  - serverless-dotenv-plugin  
+  - serverless-offline        
+
+# Plugin configuration
 custom:
   esbuild:
-    bundle: true              # Bundles all dependencies into a single file
-    minify: true              # Reduces code size for faster cold starts
-    sourcemap: true           # Enables easier debugging in CloudWatch
-    exclude: ['aws-sdk']      # Prevents bundling AWS SDK as it is pre-installed on Lambda
-    target: 'node20'          # Matches the provider runtime
+    bundle: true              
+    minify: true              
+    sourcemap: true           
+    exclude: ['aws-sdk', 'pg-native']
+    target: 'node20'          
     platform: 'node'
   
   serverless-offline:
-    httpPort: 3000            # Local API endpoint port
+    httpPort: 3000            
     lambdaPort: 3002
 
 # Packaging settings
 package:
-  individually: true          # Bundles each function separately to minimize package size
+  individually: true
