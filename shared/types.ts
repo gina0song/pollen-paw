@@ -15,10 +15,12 @@ export interface Pet {
   id: number;
   userId: number;
   name: string;
-  type: 'cat' | 'dog';
+  species: 'cat' | 'dog';  
   breed?: string;
   age?: number;
+  weight?: number;          
   photoUrl?: string;
+  medicalNotes?: string;    
   createdAt: Date;
   updatedAt: Date;
 }
@@ -26,13 +28,13 @@ export interface Pet {
 export interface SymptomLog {
   id: number;
   petId: number;
-  eyeSymptoms: number; // 1-5
-  furQuality: number; // 1-5
-  skinIrritation: number; // 1-5
-  respiratory: number; // 1-5
+  logDate: Date;            
+  eyeSymptoms?: number;     
+  furQuality?: number;        
+  skinIrritation?: number;  
+  respiratory?: number;     
   notes?: string;
   photoUrl?: string;
-  logDate: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -71,7 +73,7 @@ export interface AuthResponse {
 
 export interface CreatePetRequest {
   name: string;
-  type: 'cat' | 'dog';
+  species: 'cat' | 'dog';
   breed?: string;
   age?: number;
 }
