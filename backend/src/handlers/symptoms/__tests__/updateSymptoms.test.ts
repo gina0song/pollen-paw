@@ -8,7 +8,6 @@ const mockQuery = query as jest.MockedFunction<typeof query>;
 describe('updateSymptom Handler', () => {
   const mockContext = {} as Context;
 
-  // Helper to create a mock database result compatible with pg QueryResult
   const createMockResult = (rows: any[]) => ({
     rows,
     rowCount: rows.length,
@@ -50,9 +49,9 @@ describe('updateSymptom Handler', () => {
     expect(body.eye_symptoms).toBe(5);
     expect(body.notes).toBe('Updated notes');
     
-    // Verify dynamic SQL construction
+    // 修改重点：使用正则匹配，忽略 SQL 中的多余空格和换行
     expect(mockQuery).toHaveBeenCalledWith(
-      expect.stringContaining('UPDATE symptom_logs SET eye_symptoms = $1, notes = $2'),
+      expect.stringMatching(/UPDATE symptom_logs\s+SET eye_symptoms = \$1, notes = \$2, updated_at = CURRENT_TIMESTAMP/i),
       [5, 'Updated notes', '10', 1]
     );
   });

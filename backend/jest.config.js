@@ -1,6 +1,7 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
+  // testEnvironment: 'node',
   testEnvironmentOptions: {
     url: 'http://localhost'
   },

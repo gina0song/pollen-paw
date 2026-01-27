@@ -1,16 +1,8 @@
 
-# # Build and Installers
-# .build/
-# .serverless/
-# *.pkg
-
-
-
-.env
-.env.local
-.env.*.local
-node_modules/
-dist/
+# Build and Installers
 .build/
 .serverless/
-*.log
+*.pkg
+
+
+
