@@ -10,7 +10,7 @@ INSERT INTO users (email, password_hash, first_name, last_name, zip_code) VALUES
 ('jane@example.com', '$2a$10$rT5qzJxCZK5vYHZqYHZqYeO4J5J5J5J5J5J5J5J5J5J5J5J5J5J5O', 'Jane', 'Smith', '10001');
 
 -- Insert test pets
-INSERT INTO pets (user_id, name, type, breed, age) VALUES
+INSERT INTO pets (user_id, name, species, breed, age) VALUES
 (1, 'Luna', 'cat', 'Domestic Shorthair', 3),
 (1, 'Shadow', 'cat', 'Persian', 5),
 (2, 'Max', 'dog', 'Golden Retriever', 4),

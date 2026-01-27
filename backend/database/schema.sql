@@ -30,7 +30,7 @@ CREATE TABLE pets (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     name VARCHAR(100) NOT NULL,
-    type VARCHAR(20) NOT NULL CHECK (type IN ('cat', 'dog')),
+    species VARCHAR(20) NOT NULL CHECK (species IN ('cat', 'dog')),
     breed VARCHAR(100),
     age INTEGER CHECK (age >= 0 AND age <= 30),
     photo_url TEXT,
