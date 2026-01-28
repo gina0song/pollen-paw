@@ -2,12 +2,14 @@ import { handler } from '../getSymptoms';
 import { APIGatewayProxyEvent, Context } from 'aws-lambda';
 import { query } from '../../../services/db';
 
+// Mock the database query function
 jest.mock('../../../services/db');
 const mockQuery = query as jest.MockedFunction<typeof query>;
 
 describe('getSymptoms Handler', () => {
   const mockContext = {} as Context;
 
+  // Helper function to create a mock result matching pg library format
   const createMockResult = (rows: any[]) => ({ 
     rows,
     rowCount: rows.length,
@@ -16,25 +18,45 @@ describe('getSymptoms Handler', () => {
     fields: []
   } as any);
 
-  it('should return symptoms for valid pet', async () => {
-    const mockSymptoms = [
-      { id: 1, pet_id: 1, log_date: '2026-01-27', eye_symptoms: 4, notes: 'Test 1' },
-      { id: 2, pet_id: 1, log_date: '2026-01-26', eye_symptoms: 3, notes: 'Test 2' },
+  it('should return enriched symptoms with pollen data', async () => {
+    // Mock the data structure returned after SQL JOIN
+    const mockDbRows = [
+      { 
+        id: 1, 
+        petId: 1, 
+        logDate: '2026-01-27', 
+        eyeSymptoms: 4, 
+        treePollen: 8.5, // Mock data from environmental_data table
+        grassPollen: 3.0,
+        weedPollen: 1.5,
+        airQuality: 70
+      }
     ];
 
-    mockQuery
-      .mockResolvedValueOnce(createMockResult([{ id: 1 }])) 
-      .mockResolvedValueOnce(createMockResult(mockSymptoms));
+   
+    mockQuery.mockResolvedValueOnce(createMockResult(mockDbRows));
 
     const event = {
       queryStringParameters: { petId: '1' },
-      requestContext: { requestId: 'test-id', authorizer: { lambda: { userId: 1 } } },
+      requestContext: { 
+        authorizer: { lambda: { userId: 1 } } 
+      },
     } as unknown as APIGatewayProxyEvent;
 
     const response = await handler(event, mockContext, () => {});
 
     expect(response?.statusCode).toBe(200);
     const body = JSON.parse(response!.body);
-    expect(body).toHaveLength(2);
+    
+    // Verify the length of the returned data
+    expect(body).toHaveLength(1);
+    // Verify that pollen_data is correctly restructured
+    expect(body[0].pollen_data).toEqual({
+      treePollen: 8.5,
+      grassPollen: 3.0,
+      weedPollen: 1.5,
+      airQuality: 70,
+      source: "RDS_DATABASE"
+    });
   });
 });
