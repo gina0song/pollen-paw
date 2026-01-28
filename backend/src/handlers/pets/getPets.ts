@@ -1,18 +1,18 @@
 // ============================================
-// GET /pets - Fetch all pets for the authenticated user
+// GET /pets - Fetch all pets for an authenticated user
 // ============================================
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { query } from '../../services/db';
 
 export const handler: APIGatewayProxyHandler = async (event) => {
-  console.log('Fetching pets for request:', event.requestContext.requestId);
+  console.log('Fetching all pets for request:', event.requestContext.requestId);
 
   try {
-    // ？？？？TODO: Replace with real JWT auth - for now using placeholder
-    // In production, extract userId from JWT token in Authorization header
-    const userId = event.requestContext.authorizer?.lambda?.userId || 1;
+    // The userId logic here is consistent with your getPet.ts
+    // Once JWT is enabled, the real ID will be obtained from the authorizer
+    const userId = event.requestContext.authorizer?.lambda?.userId || 1; 
 
-    // Query all pets for this user, ordered by most recently created
+    // Query all pets for this user
     const result = await query(
       'SELECT * FROM pets WHERE user_id = $1 ORDER BY created_at DESC',
       [userId]
@@ -22,9 +22,9 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       statusCode: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*', // Enable CORS
+        'Access-Control-Allow-Origin': '*',
       },
-      body: JSON.stringify(result.rows),
+      body: JSON.stringify(result.rows), // return the list of pets
     };
   } catch (error) {
     console.error('Fetch pets error:', error);
@@ -34,7 +34,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
       },
-      body: JSON.stringify({ message: 'Failed to fetch pets' }),
+      body: JSON.stringify({ message: 'Failed to fetch pets list' }),
     };
   }
 };

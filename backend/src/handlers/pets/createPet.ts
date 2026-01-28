@@ -60,7 +60,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     }
 
     // TODO: Replace with real JWT auth
-    const userId = event.requestContext.authorizer?.lambda?.userId || 1;
+    const userId = event.requestContext.authorizer?.lambda?.userId || 1; // always 1 for now, mock user
 
    
     const result = await query(

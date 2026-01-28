@@ -21,8 +21,14 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       };
     }
 
-    // TODO: Add userId verification to ensure user owns this pet
-    const userId = event.requestContext.authorizer?.lambda?.userId || 1;
+    // for future  JWT : Add userId verification to ensure user owns this pet
+    
+    // for future  JWT : Add userId verification to ensure user owns this pet
+    //const userId = event.requestContext.authorizer?.lambda?.userId;
+// 👆 从 JWT token 中获取真实的用户 ID
+
+
+    const userId = event.requestContext.authorizer?.lambda?.userId || 1; // always 1 for now, mock user
 
     // Query pet by ID and verify ownership
     const result = await query(
