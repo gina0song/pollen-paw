@@ -71,6 +71,28 @@ functions:
           cors: true
 
   # ============================================
+  # Analysis & Insights
+  # ============================================
+  getCorrelation:
+    handler: src/handlers/insights/getCorrelation.handler
+    events:
+      - http:
+          path: analysis/correlation
+          method: get
+          cors: true
+
+  # ============================================
+  # Air Quality Manual Trigger
+  # ============================================
+  getAirQualityData:
+    handler: src/handlers/environmental/getAirQualityData.handler
+    events:
+      - http:
+          path: environmental/air-quality
+          method: get
+          cors: true
+
+  # ============================================
   # Pet Management API
   # ============================================
   getPets:
@@ -212,3 +234,22 @@ custom:
 # Packaging settings
 package:
   individually: true
+
+
+resources:
+  Resources:
+    PhotoUploadBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${env:S3_BUCKET}
+        CorsConfiguration:
+          CorsRules:
+            - AllowedMethods:
+                - GET
+                - PUT
+                - POST
+                - HEAD
+              AllowedOrigins:
+                - '*'
+              AllowedHeaders:
+                - '*'
