@@ -6,7 +6,7 @@ import { query } from '../../services/db';
 
 interface CreatePetBody {
   name: string;
-  species: 'dog' | 'cat';
+  species: 'dog' | 'cat'; 
   breed?: string;
   age?: number;
   weight?: number;
@@ -62,20 +62,17 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     // TODO: Replace with real JWT auth
     const userId = event.requestContext.authorizer?.lambda?.userId || 1;
 
-    // Insert new pet
+   
     const result = await query(
-      `INSERT INTO pets (user_id, name, species, breed, age, weight, photo_url, medical_notes)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      `INSERT INTO pets (user_id, name, species, breed, age)
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING *`,
       [
         userId,
         petData.name,
-        petData.species,
+        petData.species,  
         petData.breed || null,
         petData.age || null,
-        petData.weight || null,
-        petData.photo_url || null,
-        petData.medical_notes || null,
       ]
     );
 

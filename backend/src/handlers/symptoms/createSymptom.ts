@@ -6,13 +6,13 @@ import { query } from '../../services/db';
 
 interface CreateSymptomBody {
   pet_id: number;
-  log_date?: string; // ISO date string (YYYY-MM-DD)
-  eye_symptoms?: number;
-  fur_quality?: number;
-  skin_irritation?: number;
-  respiratory?: number;
+  log_date?: string;
+  eye_symptoms?: number;      
+  fur_quality?: number;      
+  skin_irritation?: number; 
+  respiratory?: number;       
   notes?: string;
-  photo_url?: string;
+  photo_url?: string;   
 }
 
 export const handler: APIGatewayProxyHandler = async (event) => {
@@ -32,7 +32,6 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 
     const symptomData: CreateSymptomBody = JSON.parse(event.body);
 
-    // Validate required fields
     if (!symptomData.pet_id) {
       return {
         statusCode: 400,
@@ -56,16 +55,16 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     validateSymptom(symptomData.skin_irritation, 'skin_irritation');
     validateSymptom(symptomData.respiratory, 'respiratory');
 
-    // TODO: Verify user owns this pet
-    const userId = event.requestContext.authorizer?.lambda?.userId || 1;
 
-    // Verify pet exists and belongs to user
-    const petCheck = await query(
-      'SELECT id FROM pets WHERE id = $1 AND user_id = $2',
-      [symptomData.pet_id, userId]
+    const petOwnerInfo = await query(
+      `SELECT u.zip_code 
+       FROM users u 
+       JOIN pets p ON p.user_id = u.id 
+       WHERE p.id = $1`,
+      [symptomData.pet_id]
     );
 
-    if (petCheck.rows.length === 0) {
+    if (petOwnerInfo.rows.length === 0) {
       return {
         statusCode: 404,
         headers: {
@@ -76,21 +75,23 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       };
     }
 
-    // Insert new symptom log
+    const zipCode = petOwnerInfo.rows[0].zip_code;
+
     const result = await query(
       `INSERT INTO symptom_logs 
-       (pet_id, log_date, eye_symptoms, fur_quality, skin_irritation, respiratory, notes, photo_url)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       (pet_id, zip_code, log_date, eye_symptoms, fur_quality, skin_irritation, respiratory, notes, photo_url)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING *`,
       [
         symptomData.pet_id,
-        symptomData.log_date || new Date().toISOString().split('T')[0], // Default to today
-        symptomData.eye_symptoms || null,
-        symptomData.fur_quality || null,
-        symptomData.skin_irritation || null,
-        symptomData.respiratory || null,
+        zipCode,
+        symptomData.log_date || new Date().toISOString().split('T')[0],
+        symptomData.eye_symptoms || null,     
+        symptomData.fur_quality || null,     
+        symptomData.skin_irritation || null,  
+        symptomData.respiratory || null,      
         symptomData.notes || null,
-        symptomData.photo_url || null,
+        symptomData.photo_url || null,       
       ]
     );
 
@@ -105,7 +106,6 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   } catch (error: any) {
     console.error('Create symptom error:', error);
     
-    // Handle validation errors
     if (error.message.includes('must be between')) {
       return {
         statusCode: 400,

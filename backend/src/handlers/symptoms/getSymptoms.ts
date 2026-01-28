@@ -11,7 +11,7 @@ export const handler: APIGatewayProxyHandler = async (event): Promise<APIGateway
     if (!petId) {
       return {
         statusCode: 400,
-        headers: { 
+        headers: {
           'Content-Type': 'application/json', 
           'Access-Control-Allow-Origin': '*' 
         },

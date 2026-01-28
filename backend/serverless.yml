@@ -43,6 +43,20 @@ provider:
 # Lambda function definitions
 functions:
   # ============================================
+  # Auth API (New Section)
+  # ============================================
+  registerUser:
+    handler: src/handlers/auth/register.handler
+    description: Simple user registration for demo
+    timeout: 10
+    memorySize: 256
+    events:
+      - http:
+          path: auth/register
+          method: post
+          cors: true
+          
+  # ============================================
   # Environmental Data API
   # ============================================
   getPollenData:
@@ -62,7 +76,7 @@ functions:
   getPets:
     handler: src/handlers/pets/getPets.handler
     description: Fetch all pets for authenticated user
-    timeout: 10
+    timeout: 15
     memorySize: 256
     events:
       - http:
@@ -73,7 +87,7 @@ functions:
   getPet:
     handler: src/handlers/pets/getPet.handler
     description: Fetch single pet by ID
-    timeout: 10
+    timeout: 15
     memorySize: 256
     events:
       - http:
@@ -84,7 +98,7 @@ functions:
   createPet:
     handler: src/handlers/pets/createPet.handler
     description: Create new pet profile
-    timeout: 10
+    timeout: 15
     memorySize: 256
     events:
       - http:
@@ -95,7 +109,7 @@ functions:
   updatePet:
     handler: src/handlers/pets/updatePet.handler
     description: Update existing pet profile
-    timeout: 10
+    timeout: 15
     memorySize: 256
     events:
       - http:
@@ -106,7 +120,7 @@ functions:
   deletePet:
     handler: src/handlers/pets/deletePet.handler
     description: Delete pet profile
-    timeout: 10
+    timeout: 15
     memorySize: 256
     events:
       - http:
@@ -119,8 +133,8 @@ functions:
   # ============================================
   getSymptoms:
     handler: src/handlers/symptoms/getSymptoms.handler
-    description: Fetch symptom logs for a pet
-    timeout: 10
+    description: Fetch symptom logs for a pet (includes joined pollen data)
+    timeout: 20
     memorySize: 256
     events:
       - http:
@@ -130,9 +144,9 @@ functions:
 
   createSymptom:
     handler: src/handlers/symptoms/createSymptom.handler
-    description: Create new symptom log
-    timeout: 10
-    memorySize: 256
+    description: Create new symptom log and auto-fetch pollen data
+    timeout: 30 # Increased timeout for external API call
+    memorySize: 512 # 
     events:
       - http:
           path: symptoms
@@ -142,7 +156,7 @@ functions:
   updateSymptom:
     handler: src/handlers/symptoms/updateSymptom.handler
     description: Update existing symptom log
-    timeout: 10
+    timeout: 15
     memorySize: 256
     events:
       - http:
@@ -153,7 +167,7 @@ functions:
   deleteSymptom:
     handler: src/handlers/symptoms/deleteSymptom.handler
     description: Delete symptom log
-    timeout: 10
+    timeout: 15
     memorySize: 256
     events:
       - http:
@@ -185,7 +199,7 @@ plugins:
 custom:
   esbuild:
     bundle: true              
-    minify: true              
+    minify: false # Set to false for easier debugging
     sourcemap: true           
     exclude: ['aws-sdk', 'pg-native']
     target: 'node20'          
