@@ -1,7 +1,4 @@
-// ============================================
-// POST /pets - Create a new pet profile
-// ============================================
-import { APIGatewayProxyHandler } from 'aws-lambda';
+import { APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda';
 import { query } from '../../services/db';
 
 interface CreatePetBody {
@@ -9,64 +6,36 @@ interface CreatePetBody {
   species: 'dog' | 'cat'; 
   breed?: string;
   age?: number;
-  weight?: number;
-  photo_url?: string;
-  medical_notes?: string;
+  userId?: number; 
 }
 
-export const handler: APIGatewayProxyHandler = async (event) => {
-  console.log('Creating new pet for request:', event.requestContext.requestId);
-
+export const handler: APIGatewayProxyHandler = async (event): Promise<APIGatewayProxyResult> => {
   try {
     if (!event.body) {
       return {
         statusCode: 400,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
         body: JSON.stringify({ message: 'Request body is required' }),
       };
     }
 
     const petData: CreatePetBody = JSON.parse(event.body);
 
-    // Validate required fields
     if (!petData.name || !petData.species) {
       return {
         statusCode: 400,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
-        body: JSON.stringify({ 
-          message: 'Name and species are required fields' 
-        }),
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({ message: 'Name and species are required fields' }),
       };
     }
 
-    // Validate species
-    if (petData.species !== 'dog' && petData.species !== 'cat') {
-      return {
-        statusCode: 400,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
-        body: JSON.stringify({ 
-          message: 'Species must be either "dog" or "cat"' 
-        }),
-      };
-    }
+    // 优先使用前端传来的 userId，如果没有则尝试从 authorizer 拿
+    const userId = petData.userId || event.requestContext.authorizer?.lambda?.userId || 1;
 
-    // TODO: Replace with real JWT auth
-    const userId = event.requestContext.authorizer?.lambda?.userId || 1; // always 1 for now, mock user
-
-   
     const result = await query(
       `INSERT INTO pets (user_id, name, species, breed, age)
        VALUES ($1, $2, $3, $4, $5)
-       RETURNING *`,
+       RETURNING id, name, species, breed, age, user_id as "userId"`,
       [
         userId,
         petData.name,
@@ -81,6 +50,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': 'true'
       },
       body: JSON.stringify(result.rows[0]),
     };
@@ -88,11 +58,8 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     console.error('Create pet error:', error);
     return {
       statusCode: 500,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
-      body: JSON.stringify({ message: 'Failed to create pet' }),
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify({ message: 'Failed to create pet', error: error instanceof Error ? error.message : 'Unknown error' }),
     };
   }
 };

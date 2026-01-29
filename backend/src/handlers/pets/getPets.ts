@@ -1,20 +1,16 @@
-// ============================================
-// GET /pets - Fetch all pets for an authenticated user
-// ============================================
-import { APIGatewayProxyHandler } from 'aws-lambda';
+import { APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda'; 
 import { query } from '../../services/db';
 
-export const handler: APIGatewayProxyHandler = async (event) => {
-  console.log('Fetching all pets for request:', event.requestContext.requestId);
-
+export const handler: APIGatewayProxyHandler = async (event): Promise<APIGatewayProxyResult> => { 
   try {
-    // The userId logic here is consistent with your getPet.ts
-    // Once JWT is enabled, the real ID will be obtained from the authorizer
-    const userId = event.requestContext.authorizer?.lambda?.userId || 1; 
+    const userId = event.queryStringParameters?.userId || 
+                   event.requestContext.authorizer?.lambda?.userId || 
+                   1;
 
-    // Query all pets for this user
+    console.log(`Fetching pets for userId: ${userId}`);
+
     const result = await query(
-      'SELECT * FROM pets WHERE user_id = $1 ORDER BY created_at DESC',
+      'SELECT id, name, species, breed, age, user_id as "userId" FROM pets WHERE user_id = $1 ORDER BY created_at DESC',
       [userId]
     );
 
@@ -23,18 +19,16 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': 'true'
       },
-      body: JSON.stringify(result.rows), // return the list of pets
+      body: JSON.stringify(result.rows), 
     };
   } catch (error) {
-    console.error('Fetch pets error:', error);
+    console.error('Get pets error:', error);
     return {
       statusCode: 500,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
-      body: JSON.stringify({ message: 'Failed to fetch pets list' }),
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify({ message: 'Failed to fetch pets' }),
     };
   }
 };

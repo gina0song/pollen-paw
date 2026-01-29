@@ -55,7 +55,15 @@ functions:
           path: auth/register
           method: post
           cors: true
-          
+    
+  login:
+    handler: src/handlers/auth/login.handler
+    events:
+      - http:
+          path: auth/login
+          method: post
+          cors: true
+
   # ============================================
   # Environmental Data API
   # ============================================
