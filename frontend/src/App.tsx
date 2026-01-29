@@ -1,132 +1,103 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+// ============================================
+// Main App Component
+// React Router configuration and protected routes
+// ============================================
+
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import Layout from './components/layout/Layout';
+import Dashboard from './pages/Dashboard';
+import LogSymptoms from './pages/LogSymptoms';
+import Analysis from './pages/Analysis';
+import AIInsights from './pages/AIInsights';
+import PetProfile from './pages/PetProfile';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import { authService } from './services/authService';
 import './App.css';
 
 /**
- * Interface for a single day's pollen forecast
- * Represents the transformed data structure from Lambda response
+ * Protected Route Component
+ * Redirects to login if user is not authenticated
  */
-interface PollenDay {
-  date: string;
-  pollenLevel: string;
-  grassPollen: number;
-  treePollen: number;
-  weedPollen: number;
-  recommendation: string;
-}
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const isAuthenticated = authService.isAuthenticated();
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return <>{children}</>;
+};
 
 /**
- * Interface for the complete API response
- * Matches the structure returned by Lambda function
+ * Main App Component
  */
-interface PollenResponse {
-  zipCode: string;
-  location: string; // Formatted address from Geocoding API
-  forecast: PollenDay[]; // Array of 5 days of pollen data
-}
-
-
-function App() {
-  const [zipCode, setZipCode] = useState(''); // User's ZIP code input
-  const [pollenData, setPollenData] = useState<PollenResponse | null>(null); // API response data
-  const [loading, setLoading] = useState(false); // Loading state
-  const [error, setError] = useState(''); // Error message string 
-
-  // Function to handle search button click
-  const handleSearch = async () => {
-    if (!zipCode) {
-      setError('Please enter a ZIP code');
-      return;
-    }
-
-    // Reset states before new search
-    setLoading(true);
-    setError('');
-    setPollenData(null);
-
-    // Make HTTP GET request to Lambda API
-    try {
-      const response = await axios.get(
-        `https://fhykriij99.execute-api.us-east-2.amazonaws.com/dev/environmental/pollen?zipCode=${zipCode}`
-      );
-      setPollenData(response.data); // Update state with API response data
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to fetch pollen data');
-    } finally {
-      setLoading(false); // Reset loading state
-    }
-  };
-
-  const getPollenLevelClass = (level: string) => {
-    switch (level) {
-      case 'VERY_HIGH': return 'pollen-level pollen-level-very-high';
-      case 'HIGH': return 'pollen-level pollen-level-high';
-      case 'MODERATE': return 'pollen-level pollen-level-moderate';
-      default: return 'pollen-level pollen-level-low';
-    }
-  };
-
+const App: React.FC = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>🐾 Pollen Paw</h1>
-        <p>Check pollen levels in your area</p>
+    <BrowserRouter>
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
-        {/* Input Box */}
-        <div className="search-container">
-          <input
-            type="text"
-            className="search-input"
-            placeholder="Enter ZIP code (e.g., 98074)"
-            value={zipCode}
-            onChange={(e) => setZipCode(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-          />
-          <button
-            className="search-button"
-            onClick={handleSearch}
-            disabled={loading}
-          >
-            {loading ? 'Loading...' : 'Search'}
-          </button>
-        </div>
+        {/* Protected Routes (wrapped in Layout) */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <Dashboard />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/log-symptoms"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <LogSymptoms />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/analysis"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <Analysis />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ai-insights"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <AIInsights />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/pet-profile"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <PetProfile />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
 
-        {/* Error Message */}
-        {error && (
-          <div className="error-message">
-            ❌ {error}
-          </div>
-        )}
-
-        {/* Display Pollen Data */}
-        {pollenData && (
-          <div className="results-container">
-            <h2 className="location-title">
-              📍 {pollenData.location} ({pollenData.zipCode})
-            </h2>
-            <h3 className="forecast-title">5-Day Pollen Forecast:</h3>
-            
-            <div className="forecast-grid">
-              {pollenData.forecast.map((day, index) => (
-                <div key={index} className="pollen-card">
-                  <h4 className="pollen-date">{day.date}</h4>
-                  <p className={getPollenLevelClass(day.pollenLevel)}>
-                    {day.pollenLevel}
-                  </p>
-                  <p className="pollen-detail">🌾 Grass: {day.grassPollen}/10</p>
-                  <p className="pollen-detail">🌳 Tree: {day.treePollen}/10</p>
-                  <p className="pollen-detail">🌿 Weed: {day.weedPollen}/10</p>
-                  <p className="pollen-recommendation">
-                    💡 {day.recommendation}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </header>
-    </div>
+        {/* Fallback Route */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
-}
+};
 
 export default App;

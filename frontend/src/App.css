@@ -1,135 +1,90 @@
-.App {
-  text-align: center;
+/* ============================================
+   App Layout - Basic Version
+   Simple layout without animations or shadows
+   ============================================ */
+
+.app-layout {
+  min-height: 100vh;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+/* Header - Very Simple */
+.header {
+  background-color: white;
+  border-bottom: 2px solid #ddd;
+  padding: 15px 20px;
+}
+
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: bold;
+  color: #4A90FF;
+  display: inline-block;
+}
+
+.user-section {
+  float: right;
+}
+
+.user-email {
+  color: #666;
+  font-size: 14px;
+  margin-right: 10px;
+}
+
+.logout-btn {
+  background-color: #ddd;
+  color: #333;
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+.logout-btn:hover {
+  background-color: #ccc;
+}
+
+/* Navigation - Simple List */
+.navigation {
+  background-color: white;
+  border-bottom: 1px solid #ddd;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+.nav-item {
+  display: inline-block;
+  padding: 12px 20px;
+  text-decoration: none;
+  color: #666;
+  font-size: 14px;
+  border-bottom: 3px solid transparent;
+}
+
+.nav-item:hover {
+  background-color: #f0f0f0;
+}
+
+.nav-item.active {
+  color: #4A90FF;
+  border-bottom-color: #4A90FF;
+}
+
+/* Main Content */
+.main-content {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
   padding: 20px;
 }
 
-.search-container {
-  margin: 20px;
-}
-
-.search-input {
-  padding: 10px;
-  font-size: 16px;
-  width: 200px;
-  margin-right: 10px;
-  border: none;
-  border-radius: 4px;
-}
-
-.search-button {
-  padding: 10px 20px;
-  font-size: 16px;
-  border: none;
-  border-radius: 4px;
-  background-color: #61dafb;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.search-button:hover {
-  background-color: #4fa8c5;
-}
-
-.search-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.error-message {
-  color: #ff6b6b;
-  margin: 10px;
-  padding: 10px;
-  background-color: rgba(255, 107, 107, 0.1);
-  border-radius: 4px;
-}
-
-.results-container {
-  margin-top: 30px;
-  width: 100%;
-  max-width: 1200px;
-  padding: 0 20px;
-}
-
-.location-title {
-  font-size: 24px;
-  margin-bottom: 10px;
-}
-
-.forecast-title {
-  font-size: 20px;
-  margin-bottom: 20px;
-}
-
-.forecast-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 15px;
-  width: 100%;
-}
-
-.pollen-card {
-  background: #f0f0f0;
-  padding: 15px;
-  border-radius: 8px;
-  color: #333;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.pollen-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-.pollen-date {
-  margin: 0 0 10px 0;
-  font-size: 16px;
-  font-weight: bold;
-}
-
-.pollen-level {
-  font-size: 18px;
-  font-weight: bold;
-  margin: 5px 0;
-}
-
-.pollen-level-low {
-  color: #4caf50;
-}
-
-.pollen-level-moderate {
-  color: #ffa500;
-}
-
-.pollen-level-high {
-  color: #ff6b6b;
-}
-
-.pollen-level-very-high {
-  color: #d32f2f;
-}
-
-.pollen-detail {
-  margin: 5px 0;
-  font-size: 14px;
-}
-
-.pollen-recommendation {
-  font-style: italic;
-  color: #666;
-  font-size: 14px;
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px solid #ddd;
+/* Clear floats */
+.header-content::after {
+  content: "";
+  display: table;
+  clear: both;
 }
