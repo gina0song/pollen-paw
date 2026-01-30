@@ -5,6 +5,7 @@
 
 import { api } from './api';
 import { SymptomLog } from '../types';
+import { authService } from './authService';
 
 export interface CreateSymptomRequest {
   petId?: number; 
@@ -18,11 +19,20 @@ export interface CreateSymptomRequest {
 
 export const symptomService = {
  
-getSymptoms: async (petId?: number): Promise<SymptomLog[]> => {
+  getSymptoms: async (petId?: number): Promise<SymptomLog[]> => {
     try {
       if (!petId) return [];
 
-      const url = `/symptoms?petId=${petId}&pet_id=${petId}`; 
+      // ✅ 修复：获取当前用户的 userId 并传给后端
+      const user = authService.getCurrentUser();
+      const userId = user?.id;
+
+      if (!userId) {
+        console.warn('⚠️ User not logged in or userId not found');
+        return [];
+      }
+
+      const url = `/symptoms?petId=${petId}&pet_id=${petId}&userId=${userId}`; 
       
       console.log(`🚀 Requesting symptoms with URL: ${url}`);
       const response = await api.get<any>(url);
@@ -47,8 +57,8 @@ getSymptoms: async (petId?: number): Promise<SymptomLog[]> => {
         pet_id: data.pet_id || data.petId 
       };
       
-      const response = await api.post<{ symptom: SymptomLog }>('/symptoms', finalData);
-      return response.symptom;
+      const response = await api.post<SymptomLog>('/symptoms', finalData);
+      return response;
     } catch (error: any) {
       console.error('Create symptom error:', error);
       throw new Error(error.response?.data?.error || 'Failed to log symptom');
