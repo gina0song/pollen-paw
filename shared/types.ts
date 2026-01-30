@@ -38,7 +38,14 @@ export interface SymptomLog {
   createdAt: Date;
   updatedAt: Date;
 }
-
+// Pollen Data Types
+export interface PollenDataPatch {
+  treePollen: number;
+  grassPollen: number;
+  weedPollen: number;
+  pollenLevel: string;
+}
+// Comprehensive environmental data record
 export interface EnvironmentalData {
   id: number;
   zipCode: string;
@@ -77,15 +84,20 @@ export interface CreatePetRequest {
   breed?: string;
   age?: number;
 }
-
-export interface LogSymptomRequest {
-  petId: number;
-  eyeSymptoms: number;
-  furQuality: number;
-  skinIrritation: number;
-  respiratory: number;
+// Symptom Log with dynamically injected pollen data
+export interface SymptomLog {
+  id: number;
+  petId: number;         // Note: Mapping from pet_id in backend
+  logDate: Date;            
+  eyeSymptoms?: number;     
+  furQuality?: number;        
+  skinIrritation?: number;  
+  respiratory?: number;     
   notes?: string;
-  photoBase64?: string; // Base64 encoded image
+  photoUrl?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  pollen_data?: PollenDataPatch | null; // ✨ Dynamically injected patch
 }
 
 export interface CorrelationData {
@@ -101,3 +113,5 @@ export interface AIInsight {
   recommendations: string[];
   confidence: number;
 }
+
+
