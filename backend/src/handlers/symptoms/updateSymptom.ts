@@ -11,11 +11,12 @@ interface UpdateSymptomBody {
 }
 
 export const handler: APIGatewayProxyHandler = async (event) => {
-  console.log('Updating symptom log for request:', event.requestContext.requestId);
+  console.log('--- [START] Update Symptom Log ---');
 
   try {
     const symptomId = event.pathParameters?.id;
-    const userId = event.requestContext.authorizer?.lambda?.userId || 1;
+    const userId = event.requestContext.authorizer?.lambda?.userId || 
+                   parseInt(event.queryStringParameters?.userId || "7", 10);
     
     if (!symptomId) {
       return {
@@ -33,10 +34,19 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       };
     }
 
-    const updateData: UpdateSymptomBody = JSON.parse(event.body);
+    const rawData = JSON.parse(event.body);
+
+    const updateData: UpdateSymptomBody = {
+      eye_symptoms: rawData.eyeSymptoms !== undefined ? rawData.eyeSymptoms : rawData.eye_symptoms,
+      fur_quality: rawData.furQuality !== undefined ? rawData.furQuality : rawData.fur_quality,
+      skin_irritation: rawData.skinIrritation !== undefined ? rawData.skinIrritation : rawData.skin_irritation,
+      respiratory: rawData.respiratory !== undefined ? rawData.respiratory : rawData.respiratory,
+      notes: rawData.notes,
+      photo_url: rawData.photoUrl || rawData.photo_url // 
+    };
 
     const validateSymptom = (value?: number, name?: string) => {
-      if (value !== undefined && (value < 1 || value > 5)) {
+      if (value !== undefined && value !== null && (value < 1 || value > 5)) {
         throw new Error(`${name} must be between 1 and 5`);
       }
     };
@@ -52,9 +62,10 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 
     const fields = ['eye_symptoms', 'fur_quality', 'skin_irritation', 'respiratory', 'notes', 'photo_url'];
     fields.forEach(field => {
-      if (updateData[field as keyof UpdateSymptomBody] !== undefined) {
+      const val = updateData[field as keyof UpdateSymptomBody];
+      if (val !== undefined) {
         updates.push(`${field} = $${paramCount++}`);
-        values.push(updateData[field as keyof UpdateSymptomBody]);
+        values.push(val);
       }
     });
 
@@ -67,7 +78,9 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     }
 
     updates.push(`updated_at = CURRENT_TIMESTAMP`);
-    values.push(symptomId, userId);
+    
+    values.push(symptomId);
+    values.push(userId);
 
     const result = await query(
       `UPDATE symptom_logs 
@@ -82,10 +95,11 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       return {
         statusCode: 404,
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-        body: JSON.stringify({ message: 'Symptom log not found' }),
+        body: JSON.stringify({ message: 'Symptom log not found or unauthorized' }),
       };
     }
 
+    console.log('--- [SUCCESS] Symptom log updated ---');
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
