@@ -49,12 +49,42 @@ const LogSymptoms: React.FC = () => {
 
   const handlePhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      setPhotoFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => setPhotoPreview(reader.result as string);
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    // 格式检查
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+    if (!allowedTypes.includes(file.type.toLowerCase())) {
+        alert("Unsupported format. Please use JPG or PNG.");
+        return;
     }
+
+    // 🚩 自动压缩逻辑：解决 IMG_0511 (2.1MB) 上传失败问题
+    const img = new Image();
+    img.src = URL.createObjectURL(file);
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const MAX_WIDTH = 1200; 
+      let width = img.width;
+      let height = img.height;
+
+      if (width > MAX_WIDTH) {
+        height *= MAX_WIDTH / width;
+        width = MAX_WIDTH;
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx?.drawImage(img, 0, 0, width, height);
+
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const compressedFile = new File([blob], file.name, { type: 'image/jpeg' });
+          setPhotoFile(compressedFile);
+          setPhotoPreview(canvas.toDataURL('image/jpeg'));
+        }
+      }, 'image/jpeg', 0.8);
+    };
   };
 
   const handleSubmit = async () => {
@@ -136,7 +166,8 @@ const LogSymptoms: React.FC = () => {
             <div className="symptom-header">
               <span className="symptom-name">{category.name}</span>
             </div>
-            <div className="slider-container">
+            {/* 🚩 关键修复：使用 Flex 布局强制拉开间距，解决“15”重叠 */}
+            <div className="slider-container" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <span>1</span>
               <input 
                 type="range" 
@@ -145,9 +176,19 @@ const LogSymptoms: React.FC = () => {
                 value={symptoms[category.id]} 
                 onChange={(e) => handleSymptomChange(category.id, Number(e.target.value))} 
                 className="slider" 
+                style={{ flex: 1 }}
               />
-              <span>5</span>
-              <span className="current-val">{symptoms[category.id]}</span>
+              <div style={{ display: 'flex', alignItems: 'center', minWidth: '100px' }}>
+                <span style={{ marginRight: '8px' }}>5</span>
+                <span style={{ 
+                  fontWeight: 'bold', 
+                  color: '#4A90E2',
+                  whiteSpace: 'nowrap',
+                  fontSize: '0.9rem'
+                }}>
+                  (Current: {symptoms[category.id]})
+                </span>
+              </div>
             </div>
           </div>
         ))}
