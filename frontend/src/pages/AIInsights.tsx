@@ -63,7 +63,7 @@ const AIInsights: React.FC = () => {
           <div className="insight-item green">
             <span className="bullet">●</span>
             <p>
-              Your pet's symptoms are {data ? Math.round(data.correlations.treePollen * 100) : '0'}% 
+              Your pet's symptoms are {data ? Math.round(data.correlations.treePollen * 100) : '0'}%  
               correlated with tree pollen levels
             </p>
           </div>

@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, PlusCircle, BarChart3, Sparkles, User } from 'lucide-react';
+import { Home, PlusCircle, BarChart3, User } from 'lucide-react';  // 删掉了Sparkles，之后可能会用到
 // Styles are imported in App.css
 
 const Navigation: React.FC = () => {
@@ -16,7 +16,7 @@ const Navigation: React.FC = () => {
     { path: '/', icon: Home, label: 'Dashboard' },
     { path: '/log-symptoms', icon: PlusCircle, label: 'Log Symptoms' },
     { path: '/analysis', icon: BarChart3, label: 'Analysis' },
-    { path: '/ai-insights', icon: Sparkles, label: 'AI Insights' },
+    // { path: '/ai-insights', icon: Sparkles, label: 'AI Insights' },
     { path: '/pet-profile', icon: User, label: 'Pet Profile' },
   ];
 

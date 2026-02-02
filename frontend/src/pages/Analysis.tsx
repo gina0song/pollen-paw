@@ -54,8 +54,8 @@ const Analysis: React.FC = () => {
       <div className="chart-section">
         <h3>Symptom vs Pollen Correlation</h3>
         <div className="chart-placeholder">
-          <BarChart3 size={64} className="chart-icon" />
-          <p>Chart will display symptom and pollen correlation over time</p>
+          <BarChart3 size={1} className="chart-icon" />
+          {/* <p>Chart will display symptom and pollen correlation over time</p> */}
           <div className="chart-legend">
             <span className="legend-item blue">● Symptoms</span>
             <span className="legend-item orange">● Pollen Level</span>
@@ -69,7 +69,7 @@ const Analysis: React.FC = () => {
           <h4>Top Trigger</h4>
           <div className="stat-box blue">
             <TrendingUp size={32} />
-            <p>Tree Pollen</p>
+            <p>Pollen</p>
           </div>
         </div>
 
