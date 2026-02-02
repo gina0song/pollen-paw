@@ -171,6 +171,20 @@ const PetProfile: React.FC = () => {
                 }`}
                 onClick={() => handleSelectPet(pet)}
               >
+
+
+                <button
+                  className="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center shadow-lg hover:bg-red-700 transition-colors z-10"
+                  onClick={(e) => {
+                    e.stopPropagation(); 
+                    handleDeletePet();
+                  }}
+                  title="Delete pet"
+                >
+                  <span className="text-xs font-bold">✕</span>
+                </button>
+
+
                 <h4 className="font-bold truncate">{pet.name}</h4>
                 <p className="text-xs opacity-80">{pet.species} • {pet.age || 0} yrs</p>
               </div>

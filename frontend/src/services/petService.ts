@@ -2,7 +2,6 @@
 // Pet Service
 // Handles all pet-related API calls
 // ============================================
- 
 
 import { api } from './api';
 import { authService } from './authService'; 
@@ -28,13 +27,16 @@ export const petService = {
 
   deletePet: async (id: number): Promise<void> => {
     try {
-      await api.delete(`/pets/${id}`);
+      const user = authService.getCurrentUser();
+      const userId = user?.id;
+
+      // Pass userId in request body for verification
+      await api.delete(`/pets/${id}`, { data: { userId } });
     } catch (error: any) {
       console.error('Delete pet error:', error);
       throw new Error(error.response?.data?.error || 'Failed to delete pet');
     }
   },
-
 
   createPet: async (data: CreatePetRequest): Promise<Pet> => {
     try {
@@ -52,10 +54,18 @@ export const petService = {
     }
   },
 
-
   updatePet: async (id: number, data: Partial<CreatePetRequest>): Promise<Pet> => {
     try {
-      const response = await api.put<any>(`/pets/${id}`, data);
+      const user = authService.getCurrentUser();
+      
+      const petData = {
+        ...data,
+        userId: user?.id
+      };
+
+      console.log('Updating pet:', id, 'with data:', petData);
+      
+      const response = await api.put<any>(`/pets/${id}`, petData);
       return response.pet || response;
     } catch (error: any) {
       console.error('Update pet error:', error);
