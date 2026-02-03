@@ -1,30 +1,28 @@
 // ============================================
 // Analysis Service
+// Handles correlation analysis API calls
 // ============================================
 
 import { api } from './api';
-
-export interface CorrelationResponse {
-  daysAnalyzed: number;
-  correlations: {
-    treePollen: number;
-    airQuality: number;
-  };
-  suggestion: string;
-  message?: string; 
-}
+import { CorrelationResponse } from '../types';
 
 export const analysisService = {
-  /**
-    GET /analysis/correlation?petId=xxx
-   */
+
   getCorrelation: async (petId: number): Promise<CorrelationResponse> => {
     try {
-      const response = await api.get<CorrelationResponse>(`/analysis/correlation?petId=${petId}`);
+      console.log('📊 Fetching correlation data for pet:', petId);
+      
+      const response = await api.get<CorrelationResponse>(
+        `/analysis/correlation?petId=${petId}`
+      );
+      
+      console.log('✅ Correlation data received:', response);
       return response;
     } catch (error: any) {
-      console.error('Analysis API error:', error);
+      console.error('❌ Analysis API error:', error);
       throw new Error(error.response?.data?.message || 'Failed to fetch analysis');
     }
   }
 };
+
+export type { CorrelationResponse } from '../types';
