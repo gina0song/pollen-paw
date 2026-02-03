@@ -50,7 +50,6 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       };
     }
 
-    // 1. 验证症状分值 (1-5)
     const validateSymptom = (value?: number, name?: string) => {
       if (value !== undefined && value !== null && (value < 1 || value > 5)) {
         throw new Error(`${name} must be between 1 and 5`);
@@ -61,14 +60,13 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     validateSymptom(symptomData.skin_irritation, 'skin_irritation');
     validateSymptom(symptomData.respiratory, 'respiratory');
 
-    // 2. 获取 Pet 关联的邮编
     console.log('Creating symptom for pet_id:', symptomData.pet_id);
     const petOwnerInfo = await query(
       `SELECT u.zip_code FROM users u JOIN pets p ON p.user_id = u.id WHERE p.id = $1`,
       [symptomData.pet_id]
     );
     console.log('Owner user_id:', petOwnerInfo.rows[0].id); 
-    
+
     if (petOwnerInfo.rows.length === 0) {
       return {
         statusCode: 404,

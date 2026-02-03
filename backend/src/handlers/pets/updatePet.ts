@@ -13,6 +13,7 @@ interface UpdatePetBody {
  photo_url?: string;
  medical_notes?: string;
  userId?: number;
+ is_memorial?: boolean;
 }
 
 export const handler: APIGatewayProxyHandler = async (event) => {
@@ -96,6 +97,11 @@ export const handler: APIGatewayProxyHandler = async (event) => {
      updates.push(`medical_notes = $${paramCount++}`);
      values.push(updateData.medical_notes);
    }
+   // Handle is_memorial update
+  if (updateData.is_memorial !== undefined) {
+      updates.push(`is_memorial = $${paramCount++}`);
+      values.push(updateData.is_memorial);
+    }
 
    if (updates.length === 0) {
      return {
@@ -114,7 +120,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
    values.push(petId, userId);
 
    const whereClause = `WHERE id = $${paramCount} AND user_id = $${paramCount + 1}`;
-   const sqlQuery = `UPDATE pets SET ${updates.join(', ')} ${whereClause} RETURNING id, name, species, breed, age, user_id as "userId", updated_at, created_at`;
+   const sqlQuery = `UPDATE pets SET ${updates.join(', ')} ${whereClause} RETURNING id, name, species, breed, age, is_memorial, user_id as "userId", updated_at, created_at`;
 
    console.log('SQL:', sqlQuery);
    console.log('Values:', values);

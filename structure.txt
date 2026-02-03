@@ -1,0 +1,151 @@
+.
+├── .DS_Store
+├── .gitignore
+├── .vscode
+│   └── settings.json
+├── README.md
+├── backend
+│   ├── .DS_Store
+│   ├── .build
+│   │   └── src
+│   │       └── handlers
+│   │           └── environmental
+│   │               ├── getPollenData.d.ts
+│   │               ├── getPollenData.d.ts.map
+│   │               ├── getPollenData.js
+│   │               └── getPollenData.js.map
+│   ├── .env
+│   ├── .env.example
+│   ├── .gitignore
+│   ├── .serverless
+│   │   ├── cloudformation-template-create-stack.json
+│   │   ├── cloudformation-template-update-stack.json
+│   │   ├── createPet.zip
+│   │   ├── createSymptom.zip
+│   │   ├── deletePet.zip
+│   │   ├── deleteSymptom.zip
+│   │   ├── getAirQualityData.zip
+│   │   ├── getCorrelation.zip
+│   │   ├── getPet.zip
+│   │   ├── getPets.zip
+│   │   ├── getPollenData.zip
+│   │   ├── getSymptoms.zip
+│   │   ├── login.zip
+│   │   ├── registerUser.zip
+│   │   ├── serverless-state.json
+│   │   ├── updatePet.zip
+│   │   ├── updateSymptom.zip
+│   │   └── uploadPhoto.zip
+│   ├── database
+│   │   ├── migrations
+│   │   ├── run-migration.js
+│   │   ├── run-seed.js
+│   │   ├── schema.sql
+│   │   └── seed.sql
+│   ├── docs
+│   │   ├── LOCAL_TESTING.md
+│   │   └── TESTING_SUMMARY.md
+│   ├── jest.config.js
+│   ├── jest.setup.js
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── serverless.yml
+│   ├── src
+│   │   ├── handlers
+│   │   │   ├── auth
+│   │   │   │   ├── login.ts
+│   │   │   │   └── register.ts
+│   │   │   ├── environmental
+│   │   │   │   ├── __tests__
+│   │   │   │   │   ├── getPollenData.edge.test.ts
+│   │   │   │   │   ├── getPollenData.mock.test.ts
+│   │   │   │   │   └── getPollenData.test.ts
+│   │   │   │   ├── getAirQualityData.ts
+│   │   │   │   └── getPollenData.ts
+│   │   │   ├── insights
+│   │   │   │   └── getCorrelation.ts
+│   │   │   ├── pets
+│   │   │   │   ├── __tests__
+│   │   │   │   │   └── getPets.test.ts
+│   │   │   │   ├── createPet.ts
+│   │   │   │   ├── deletePet.ts
+│   │   │   │   ├── getPet.ts
+│   │   │   │   ├── getPets.ts
+│   │   │   │   └── updatePet.ts
+│   │   │   ├── symptoms
+│   │   │   │   ├── __tests__
+│   │   │   │   │   ├── createSymptom.test.ts
+│   │   │   │   │   ├── deleteSymptom.test.ts
+│   │   │   │   │   ├── getSymptoms.test.ts
+│   │   │   │   │   └── updateSymptoms.test.ts
+│   │   │   │   ├── createSymptom.ts
+│   │   │   │   ├── deleteSymptom.ts
+│   │   │   │   ├── getSymptoms.ts
+│   │   │   │   └── updateSymptom.ts
+│   │   │   └── upload
+│   │   │       ├── __tests__
+│   │   │       │   └── testpic4pollenpaw.jpg
+│   │   │       ├── upload.test.ts
+│   │   │       └── uploadPhoto.ts
+│   │   ├── services
+│   │   │   ├── airQualityService.ts
+│   │   │   ├── db.ts
+│   │   │   └── pollenService.ts
+│   │   └── utils
+│   │       ├── dateFormatter.test.ts
+│   │       ├── dateFormatter.ts
+│   │       ├── pollenCalculator.test.ts
+│   │       ├── pollenCalculator.ts
+│   │       ├── pollenExtractor.test.ts
+│   │       └── pollenExtractor.ts
+│   └── tsconfig.json
+├── frontend
+│   ├── .DS_Store
+│   ├── .env
+│   ├── .env.example
+│   ├── CLEANUP_AND_SETUP.md
+│   ├── README.md
+│   ├── SETUP_GUIDE.md
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── public
+│   │   └── index.html
+│   ├── src
+│   │   ├── .DS_Store
+│   │   ├── App.css
+│   │   ├── App.tsx
+│   │   ├── components
+│   │   │   ├── .DS_Store
+│   │   │   ├── layout
+│   │   │   │   ├── Header.tsx
+│   │   │   │   ├── Layout.tsx
+│   │   │   │   └── Navigation.tsx
+│   │   │   └── styles
+│   │   ├── index.css
+│   │   ├── index.tsx
+│   │   ├── pages
+│   │   │   ├── .DS_Store
+│   │   │   ├── AIInsights.tsx
+│   │   │   ├── Analysis.tsx
+│   │   │   ├── Dashboard.tsx
+│   │   │   ├── LogSymptoms.tsx
+│   │   │   ├── Login.tsx
+│   │   │   ├── PetProfile.tsx
+│   │   │   ├── Register.tsx
+│   │   │   └── styles
+│   │   │       └── AllPages.css
+│   │   ├── services
+│   │   │   ├── analysisService.ts
+│   │   │   ├── api.ts
+│   │   │   ├── authService.ts
+│   │   │   ├── environmentalService.ts
+│   │   │   ├── petService.ts
+│   │   │   └── symptomService.ts
+│   │   └── types
+│   │       └── index.ts
+│   └── tsconfig.json
+├── shared
+│   └── types.ts
+└── structure.txt
+
+36 directories, 113 files

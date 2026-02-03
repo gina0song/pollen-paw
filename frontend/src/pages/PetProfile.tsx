@@ -68,7 +68,7 @@ const PetProfile: React.FC = () => {
         species: petType.toLowerCase() as 'cat' | 'dog',
         breed: petBreed || undefined,
         age: petAge ? parseInt(petAge) : undefined,
-        userId: currentUser?.id
+        userId: currentUser?.id,
       };
 
       if (selectedPet && selectedPet.id) {
@@ -258,7 +258,6 @@ const PetProfile: React.FC = () => {
             {loading ? 'Saving...' : (selectedPet ? 'Update Pet' : 'Save New Pet')}
           </button>
 
-          {/* ✅ NEW: Delete button (only show when editing existing pet) */}
           {selectedPet && (
             <button
               className="delete-btn bg-red-600 text-white py-3 px-6 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-red-700 active:bg-red-800 transition shadow-lg disabled:opacity-50"
