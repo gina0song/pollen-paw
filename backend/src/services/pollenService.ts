@@ -1,3 +1,8 @@
+// ============================================
+// Pollen Service
+// Fetches pollen data from Google Pollen API and stores in database
+// ============================================
+
 import axios from 'axios';
 import { query } from './db';
 import { extractPollenValues } from '../utils/pollenExtractor';
@@ -10,8 +15,8 @@ export async function getHistoricalPollen(dateStr: string, zipCode: string) {
 
     // 1. Attempt to fetch from local RDS database first (cost-saving)
     const dbResult = await query(
-      `SELECT tree_pollen, grass_pollen, weed_pollen, air_quality 
-       FROM environmental_data 
+      `SELECT tree_pollen, grass_pollen, weed_pollen, air_quality
+       FROM environmental_data
        WHERE zip_code = $1 AND date = $2`,
       [zipCode, dateStr]
     );
@@ -34,11 +39,11 @@ export async function getHistoricalPollen(dateStr: string, zipCode: string) {
     }
 
     console.log(`[PollenService] Cache miss. Calling Google Geocoding for ${zipCode}...`);
-    
+
     // Step A: Geocode ZIP code to coordinates
     const geocodingUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${zipCode}&key=${apiKey}`;
     const geoRes = await axios.get(geocodingUrl);
-    
+
     if (geoRes.data.status !== 'OK') {
       console.error(`[PollenService] Geocoding failed: ${geoRes.data.status}`, geoRes.data.error_message || '');
       return null;
@@ -46,25 +51,54 @@ export async function getHistoricalPollen(dateStr: string, zipCode: string) {
 
     const { lat, lng } = geoRes.data.results[0].geometry.location;
     console.log(`[PollenService] Coordinates found: ${lat}, ${lng}`);
-    
+
     // Step B: Fetch forecast from Google Pollen API
-    const pollenUrl = `https://pollen.googleapis.com/v1/forecast:lookup?key=${apiKey}&location.latitude=${lat}&location.longitude=${lng}&days=1`;
+    // ✅ FIXED: Using forecast:lookup with plantsDescription=true to get plantInfo
+    const pollenUrl = `https://pollen.googleapis.com/v1/forecast:lookup?key=${apiKey}&location.latitude=${lat}&location.longitude=${lng}&days=1&plantsDescription=true`;
+    
+    console.log(`[PollenService] Calling Google Pollen API...`);
     const pollenRes = await axios.get(pollenUrl);
 
     if (!pollenRes.data.dailyInfo || pollenRes.data.dailyInfo.length === 0) {
       console.warn(`[PollenService] Google Pollen API returned no dailyInfo for ${lat}, ${lng}`);
       return null;
     }
-    
-    // Step C: Extract values using utility
-    const extracted = extractPollenValues(pollenRes.data.dailyInfo[0].pollenTypeInfo);
+
+    const dailyInfo = pollenRes.data.dailyInfo[0];
+    console.log(`[PollenService] Received dailyInfo for date: ${dailyInfo.date.year}-${dailyInfo.date.month}-${dailyInfo.date.day}`);
+
+    // ✅ FIXED: Extract from plantInfo instead of pollenTypeInfo
+    // plantInfo contains individual plants with their indexInfo values
+    // We group them by type (TREE/GRASS/WEED) and average the values
+    if (!dailyInfo.plantInfo || dailyInfo.plantInfo.length === 0) {
+      console.warn(`[PollenService] Google Pollen API returned no plantInfo`);
+      return null;
+    }
+
+    const extracted = extractPollenValues(dailyInfo.plantInfo);
     console.log(`[PollenService] Successfully extracted data:`, extracted);
+
+    // ✅ Save to database for future cache hits
+    try {
+      await query(
+        `INSERT INTO environmental_data (zip_code, date, tree_pollen, grass_pollen, weed_pollen)
+         VALUES ($1, $2, $3, $4, $5)
+         ON CONFLICT (zip_code, date) DO UPDATE SET
+         tree_pollen = $3,
+         grass_pollen = $4,
+         weed_pollen = $5`,
+        [zipCode, dateStr, extracted.treePollen, extracted.grassPollen, extracted.weedPollen]
+      );
+      console.log(`[PollenService] Saved pollen data to database for ${zipCode} on ${dateStr}`);
+    } catch (dbError: any) {
+      console.error(`[PollenService] Failed to save to database:`, dbError.message);
+    }
 
     return {
       treePollen: extracted.treePollen,
       grassPollen: extracted.grassPollen,
       weedPollen: extracted.weedPollen,
-      airQuality: null 
+      airQuality: null
     };
 
   } catch (error: any) {
