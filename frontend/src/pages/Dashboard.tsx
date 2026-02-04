@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Activity, TrendingUp, X } from 'lucide-react';
+import { Calendar, Activity, TrendingUp } from 'lucide-react';
 import { symptomService } from '../services/symptomService';
 import { petService } from '../services/petService';
 import { SymptomLog, Pet } from '../types';
@@ -84,7 +84,7 @@ const Dashboard: React.FC = () => {
 
         setStats({
           daysLogged: uniqueDays,
-          avgPollen: avgPollen, 
+          avgPollen: avgPollen,
           avgSymptoms: symptomList.length > 0
             ? symptomList.length / (uniqueDays || 1)
             : 0,
@@ -227,6 +227,7 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
+      {/* ✅ Recent Records with Horizontal Grid Layout */}
       <div className="photos-section card">
         <h3>Recent Records</h3>
         <div className="recent-logs">
@@ -234,8 +235,11 @@ const Dashboard: React.FC = () => {
             recentSymptoms.slice(0, 3).map(symptom => (
               <div
                 key={symptom.id}
-                className="log-card"
                 style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 150px',
+                  gap: '15px',
+                  alignItems: 'start',
                   border: '1px solid #e5e7eb',
                   borderRadius: '8px',
                   padding: '15px',
@@ -244,53 +248,36 @@ const Dashboard: React.FC = () => {
                   position: 'relative',
                 }}
               >
-                <button
-                  onClick={() => handleDeleteSymptom(symptom.id)}
-                  style={{
-                    position: 'absolute',
-                    top: '10px',
-                    right: '10px',
-                    backgroundColor: '#ef4444',
-                    color: 'white',
-                    border: 'none',
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transition: 'background-color 0.2s',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#dc2626';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#ef4444';
-                  }}
-                >
-                  <X size={18} />
-                </button>
+                {/* Left: Date + Notes */}
+                <div>
+                  <div
+                    style={{
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#374151',
+                      marginBottom: '10px',
+                    }}
+                  >
+                    {new Date(symptom.logDate).toISOString().split('T')[0]}
+                  </div>
 
-                <div
-                  style={{
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: '#374151',
-                    marginBottom: '10px',
-                    paddingRight: '40px',
-                  }}
-                >
-                  {new Date(symptom.logDate).toISOString().split('T')[0]}
+                  <div
+                    style={{
+                      fontSize: '13px',
+                      color: '#6b7280',
+                      lineHeight: '1.5',
+                    }}
+                  >
+                    {symptom.notes ? symptom.notes : 'No notes'}
+                  </div>
                 </div>
 
-                {/* Photo */}
+                {/* Right: Photo */}
                 <div
                   style={{
-                    marginBottom: '10px',
                     backgroundColor: '#f3f4f6',
                     borderRadius: '6px',
-                    minHeight: '120px',
+                    height: '120px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -309,20 +296,43 @@ const Dashboard: React.FC = () => {
                       }}
                     />
                   ) : (
-                    <span style={{ color: '#9ca3af', fontSize: '13px' }}>No Photo</span>
+                    <span style={{ color: '#9ca3af', fontSize: '12px' }}>No Photo</span>
                   )}
                 </div>
 
-                {/* Notes */}
-                <div
+                {/* ✅ Delete Button - Small Red Circle, Top Right */}
+                <button
+                  onClick={() => handleDeleteSymptom(symptom.id)}
+                  title="Delete this symptom log"
                   style={{
-                    fontSize: '13px',
-                    color: '#6b7280',
-                    lineHeight: '1.5',
+                    position: 'absolute',
+                    top: '-8px',
+                    right: '-8px',
+                    width: '28px',
+                    height: '28px',
+                    borderRadius: '50%',
+                    backgroundColor: '#dc2626',
+                    color: 'white',
+                    border: 'none',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '16px',
+                    fontWeight: 'bold',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                    zIndex: 10,
+                    transition: 'background-color 0.2s',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#b91c1c';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#dc2626';
                   }}
                 >
-                  {symptom.notes ? symptom.notes : 'No notes'}
-                </div>
+                  ✕
+                </button>
               </div>
             ))
           ) : (
