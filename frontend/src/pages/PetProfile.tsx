@@ -1,5 +1,5 @@
 // ============================================
-// Pet Profile Page - WITH DELETE FUNCTIONALITY
+// Pet Profile Page - Pure Inline Styles (No Tailwind)
 // ============================================
 
 import React, { useState, useEffect } from 'react';
@@ -38,7 +38,6 @@ const PetProfile: React.FC = () => {
       if (validPets.length > 0) {
         handleSelectPet(validPets[0]);
       } else {
-        // Reset form if no pets
         setSelectedPet(null);
         setPetName('');
         setPetAge('');
@@ -93,7 +92,6 @@ const PetProfile: React.FC = () => {
     }
   };
 
-  // ✅ NEW: Delete pet functionality
   const handleDeletePet = async () => {
     if (!selectedPet || !selectedPet.id) {
       alert('No pet selected to delete');
@@ -110,11 +108,9 @@ const PetProfile: React.FC = () => {
       setLoading(true);
       await petService.deletePet(selectedPet.id);
       
-      // Remove from local state
       const updatedPets = pets.filter(p => p.id !== selectedPet.id);
       setPets(updatedPets);
       
-      // Select another pet or reset form
       if (updatedPets.length > 0) {
         handleSelectPet(updatedPets[0]);
       } else {
@@ -134,138 +130,257 @@ const PetProfile: React.FC = () => {
   };
 
   return (
-    <div className="pet-profile-page">
-      <h2 className="page-title text-2xl font-bold mb-4">Pet Profile Management</h2>
+    <div style={{ padding: '20px' }}>
+      <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '20px' }}>Pet Profile Management</h2>
       
-      <div className="account-section bg-gray-50 p-4 rounded-lg mb-6">
-        <h3 className="font-semibold text-gray-700">Account Settings</h3>
-        <p className="text-sm text-gray-500 italic">Logged in as: {userEmail}</p>
+      {/* Account Settings */}
+      <div style={{ backgroundColor: '#f3f4f6', padding: '16px', borderRadius: '8px', marginBottom: '24px' }}>
+        <h3 style={{ fontWeight: '600', color: '#374151' }}>Account Settings</h3>
+        <p style={{ fontSize: '14px', color: '#6b7280', fontStyle: 'italic' }}>Logged in as: {userEmail}</p>
       </div>
 
-      <div className="pets-section mb-8">
-        <div className="section-header flex justify-between items-center mb-4">
-          <h3 className="font-bold text-gray-800">My Pets</h3>
+      {/* My Pets Section */}
+      <div style={{ marginBottom: '32px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <h3 style={{ fontWeight: 'bold', color: '#1f2937', fontSize: '16px' }}>My Pets</h3>
           <button
             title="Add New Pet"
-            className="add-pet-btn p-2 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200 transition"
             onClick={() => {
               setSelectedPet(null);
               setPetName('');
               setPetAge('');
               setPetBreed('');
             }}
+            style={{
+              padding: '8px',
+              backgroundColor: '#dbeafe',
+              color: '#2563eb',
+              border: 'none',
+              borderRadius: '50%',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '40px',
+              height: '40px',
+            }}
           >
-            <Plus size={24}/>
+            <Plus size={24} />
           </button>
         </div>
         
-        <div className="pets-list flex gap-3 overflow-x-auto pb-4">
+        <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '16px' }}>
           {pets && pets.length > 0 ? (
             pets.map(pet => (pet && pet.id) ? (
               <div
                 key={pet.id}
-                className={`pet-card border min-w-[140px] p-4 rounded-xl cursor-pointer transition-all shadow-sm ${
-                  selectedPet?.id === pet.id
-                    ? 'bg-blue-600 text-white border-blue-600 shadow-md transform scale-105'
-                    : 'bg-white hover:border-blue-300'
-                }`}
                 onClick={() => handleSelectPet(pet)}
+                style={{
+                  border: selectedPet?.id === pet.id ? '2px solid #2563eb' : '1px solid #ddd',
+                  minWidth: '140px',
+                  padding: '16px',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  backgroundColor: selectedPet?.id === pet.id ? '#2563eb' : 'white',
+                  color: selectedPet?.id === pet.id ? 'white' : 'black',
+                  position: 'relative',
+                  boxShadow: selectedPet?.id === pet.id ? '0 4px 12px rgba(0,0,0,0.15)' : '0 1px 2px rgba(0,0,0,0.05)',
+                  transform: selectedPet?.id === pet.id ? 'scale(1.05)' : 'scale(1)',
+                }}
               >
-
-
+                {/* ✅ Delete Button - Small Red Circle */}
                 <button
-                  className="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center shadow-lg hover:bg-red-700 transition-colors z-10"
                   onClick={(e) => {
-                    e.stopPropagation(); 
-                    handleDeletePet();
+                    e.stopPropagation();
+                    setSelectedPet(pet);
+                    setTimeout(() => handleDeletePet(), 0);
                   }}
                   title="Delete pet"
+                  style={{
+                    position: 'absolute',
+                    top: '-1px',
+                    right: '1px',
+                    width: '5px',
+                    height: '5px',
+                    borderRadius: '50%',
+                    backgroundColor: '#dc2626',
+                    color: 'white',
+                    border: 'none',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                    zIndex: 10,
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#b91c1c';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#dc2626';
+                  }}
                 >
-                  <span className="text-xs font-bold">✕</span>
+                  ✕
                 </button>
 
-
-                <h4 className="font-bold truncate">{pet.name}</h4>
-                <p className="text-xs opacity-80">{pet.species} • {pet.age || 0} yrs</p>
+                <h4 style={{ fontWeight: 'bold', marginBottom: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {pet.name}
+                </h4>
+                <p style={{ fontSize: '12px', opacity: 0.8 }}>
+                  {pet.species} • {pet.age || 0} yrs
+                </p>
               </div>
             ) : null)
           ) : (
-            <p className="text-gray-400 text-sm italic py-4">No pets found. Click the (+) button to add your first pet!</p>
+            <p style={{ color: '#9ca3af', fontSize: '14px', fontStyle: 'italic', padding: '16px 0' }}>
+              No pets found. Click the (+) button to add your first pet!
+            </p>
           )}
         </div>
       </div>
 
-      <div className="pet-form-section bg-white border p-6 rounded-2xl shadow-sm border-gray-100">
-        <h3 className="font-bold mb-6 text-gray-700 text-lg border-b pb-2">
+      {/* Pet Form Section */}
+      <div style={{ backgroundColor: 'white', border: '1px solid #f3f4f6', padding: '24px', borderRadius: '16px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+        <h3 style={{ fontWeight: 'bold', marginBottom: '24px', color: '#374151', fontSize: '18px', borderBottom: '1px solid #e5e7eb', paddingBottom: '8px' }}>
           {selectedPet ? `Editing: ${selectedPet.name}` : 'Add New Pet'}
         </h3>
         
-        <div className="space-y-4">
-          <div className="form-group flex flex-col">
-            <label className="text-sm font-medium text-gray-600 mb-1">Pet Name *</label>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {/* Pet Name */}
+          <div>
+            <label style={{ fontSize: '14px', fontWeight: '500', color: '#4b5563', marginBottom: '4px', display: 'block' }}>
+              Pet Name *
+            </label>
             <input
-              className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
               type="text"
               value={petName}
               onChange={(e) => setPetName(e.target.value)}
               placeholder="e.g. Buddy"
+              style={{
+                border: '1px solid #d1d5db',
+                padding: '8px',
+                borderRadius: '8px',
+                fontSize: '14px',
+                width: '100%',
+                boxSizing: 'border-box',
+              }}
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="form-group flex flex-col">
-              <label className="text-sm font-medium text-gray-600 mb-1">Type</label>
+          {/* Type and Age */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div>
+              <label style={{ fontSize: '14px', fontWeight: '500', color: '#4b5563', marginBottom: '4px', display: 'block' }}>
+                Type
+              </label>
               <select
-                className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none bg-white"
                 value={petType}
                 onChange={(e) => setPetType(e.target.value)}
+                style={{
+                  border: '1px solid #d1d5db',
+                  padding: '8px',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  width: '100%',
+                  boxSizing: 'border-box',
+                  backgroundColor: 'white',
+                }}
               >
                 <option value="Dog">Dog</option>
                 <option value="Cat">Cat</option>
               </select>
             </div>
-            <div className="form-group flex flex-col">
-              <label className="text-sm font-medium text-gray-600 mb-1">Age (Years)</label>
+            <div>
+              <label style={{ fontSize: '14px', fontWeight: '500', color: '#4b5563', marginBottom: '4px', display: 'block' }}>
+                Age (Years)
+              </label>
               <input
-                className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
                 type="number"
                 value={petAge}
                 onChange={(e) => setPetAge(e.target.value)}
                 placeholder="0"
+                style={{
+                  border: '1px solid #d1d5db',
+                  padding: '8px',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  width: '100%',
+                  boxSizing: 'border-box',
+                }}
               />
             </div>
           </div>
 
-          <div className="form-group flex flex-col">
-            <label className="text-sm font-medium text-gray-600 mb-1">Breed</label>
+          {/* Breed */}
+          <div>
+            <label style={{ fontSize: '14px', fontWeight: '500', color: '#4b5563', marginBottom: '4px', display: 'block' }}>
+              Breed
+            </label>
             <input
-              className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
               type="text"
               value={petBreed}
               onChange={(e) => setPetBreed(e.target.value)}
               placeholder="e.g. Golden Retriever"
+              style={{
+                border: '1px solid #d1d5db',
+                padding: '8px',
+                borderRadius: '8px',
+                fontSize: '14px',
+                width: '100%',
+                boxSizing: 'border-box',
+              }}
             />
           </div>
         </div>
         
-        <div className="button-group flex gap-3 mt-8">
+        {/* Buttons */}
+        <div style={{ display: 'flex', gap: '12px', marginTop: '32px' }}>
           <button
-            className="save-changes-btn flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-blue-700 active:bg-blue-800 transition shadow-lg disabled:opacity-50"
             onClick={handleCreateOrUpdate}
             disabled={loading}
+            style={{
+              flex: 1,
+              backgroundColor: '#2563eb',
+              color: 'white',
+              padding: '12px',
+              borderRadius: '12px',
+              fontWeight: 'bold',
+              border: 'none',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              opacity: loading ? 0.5 : 1,
+            }}
           >
-            <Save size={20}/>
+            <Save size={20} />
             {loading ? 'Saving...' : (selectedPet ? 'Update Pet' : 'Save New Pet')}
           </button>
 
           {selectedPet && (
             <button
-              className="delete-btn bg-red-600 text-white py-3 px-6 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-red-700 active:bg-red-800 transition shadow-lg disabled:opacity-50"
               onClick={handleDeletePet}
               disabled={loading}
-              title="Delete this pet"
+              style={{
+                backgroundColor: '#dc2626',
+                color: 'white',
+                padding: '12px 24px',
+                borderRadius: '12px',
+                fontWeight: 'bold',
+                border: 'none',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                opacity: loading ? 0.5 : 1,
+              }}
             >
-              <Trash2 size={20}/>
+              <Trash2 size={20} />
               Delete
             </button>
           )}
