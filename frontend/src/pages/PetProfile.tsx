@@ -1,5 +1,5 @@
 // ============================================
-// Pet Profile Page - Pure Inline Styles (No Tailwind)
+// Pet Profile Page - With Memorial Account Feature
 // ============================================
 
 import React, { useState, useEffect } from 'react';
@@ -17,6 +17,11 @@ const PetProfile: React.FC = () => {
   const [petType, setPetType] = useState('Dog');
   const [petAge, setPetAge] = useState('');
   const [petBreed, setPetBreed] = useState('');
+  const [memorialPets, setMemorialPets] = useState<Set<number>>(() => {
+    // ✅ Load from localStorage on init
+    const saved = localStorage.getItem('memorialPets');
+    return saved ? new Set(JSON.parse(saved)) : new Set();
+  });
 
   const user = authService.getCurrentUser();
   const userEmail = user?.email || '';
@@ -129,6 +134,23 @@ const PetProfile: React.FC = () => {
     }
   };
 
+  // ✅ NEW: Handle memorial account toggle with localStorage persistence
+  const handleToggleMemorial = (petId: number) => {
+    setMemorialPets(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(petId)) {
+        newSet.delete(petId);
+      } else {
+        newSet.add(petId);
+      }
+      // ✅ Save to localStorage
+      localStorage.setItem('memorialPets', JSON.stringify(Array.from(newSet)));
+      return newSet;
+    });
+  };
+
+  const isCurrentPetMemorial = selectedPet && memorialPets.has(selectedPet.id);
+
   return (
     <div style={{ padding: '20px' }}>
       <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '20px' }}>Pet Profile Management</h2>
@@ -187,44 +209,73 @@ const PetProfile: React.FC = () => {
                   position: 'relative',
                   boxShadow: selectedPet?.id === pet.id ? '0 4px 12px rgba(0,0,0,0.15)' : '0 1px 2px rgba(0,0,0,0.05)',
                   transform: selectedPet?.id === pet.id ? 'scale(1.05)' : 'scale(1)',
+                  // ✅ MEMORIAL: Grayscale + reduced opacity if memorial
+                  filter: memorialPets.has(pet.id) ? 'grayscale(100%) opacity(0.7)' : 'none',
                 }}
               >
-                {/* ✅ Delete Button - Small Red Circle */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedPet(pet);
-                    setTimeout(() => handleDeletePet(), 0);
-                  }}
-                  title="Delete pet"
-                  style={{
-                    position: 'absolute',
-                    top: '-1px',
-                    right: '1px',
-                    width: '5px',
-                    height: '5px',
-                    borderRadius: '50%',
-                    backgroundColor: '#dc2626',
-                    color: 'white',
-                    border: 'none',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '14px',
-                    fontWeight: 'bold',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-                    zIndex: 10,
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#b91c1c';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#dc2626';
-                  }}
-                >
-                  ✕
-                </button>
+                {/* ✅ MEMORIAL ICON: Purple heart (💜) */}
+                {memorialPets.has(pet.id) && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '-8px',
+                      right: '-8px',
+                      fontSize: '20px',
+                      backgroundColor: 'white',
+                      borderRadius: '50%',
+                      width: '36px',
+                      height: '36px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                      zIndex: 10,
+                    }}
+                    title="Memorial Account"
+                  >
+                    💜
+                  </div>
+                )}
+
+                {/* Delete Button - Only show if NOT memorial */}
+                {!memorialPets.has(pet.id) && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedPet(pet);
+                      setTimeout(() => handleDeletePet(), 0);
+                    }}
+                    title="Delete pet"
+                    style={{
+                      position: 'absolute',
+                      top: '-1px',
+                      right: '-5px',
+                      width: '20px',
+                      height: '20px',
+                      padding: '0', 
+                      borderRadius: '50%',
+                      backgroundColor: '#dc2626',
+                      color: 'white',
+                      border: 'none',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '15px',
+                      fontWeight: 'bold',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                      zIndex: 10,
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#b91c1c';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = '#dc2626';
+                    }}
+                  >
+                    ✕
+                  </button>
+                )}
 
                 <h4 style={{ fontWeight: 'bold', marginBottom: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {pet.name}
@@ -245,20 +296,68 @@ const PetProfile: React.FC = () => {
       {/* Pet Form Section */}
       <div style={{ backgroundColor: 'white', border: '1px solid #f3f4f6', padding: '24px', borderRadius: '16px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
         <h3 style={{ fontWeight: 'bold', marginBottom: '24px', color: '#374151', fontSize: '18px', borderBottom: '1px solid #e5e7eb', paddingBottom: '8px' }}>
-          {selectedPet ? `Editing: ${selectedPet.name}` : 'Add New Pet'}
+          {selectedPet ? `Editing: ${selectedPet.name}${isCurrentPetMemorial ? ' (Memorial Account)' : ''}` : 'Add New Pet'}
         </h3>
         
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {/* Pet Name */}
+        {/* ✅ MEMORIAL NOTICE: Show if this pet is memorial */}
+        {isCurrentPetMemorial && (
+          <div style={{
+            backgroundColor: '#f3e8ff',
+            border: '2px solid #d8b4fe',
+            borderRadius: '8px',
+            padding: '24px',
+            marginBottom: '20px',
+            textAlign: 'center',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
+              <span style={{ fontSize: '32px' }}>💜</span>
+            </div>
+            <p style={{ fontSize: '20px', fontWeight: '700', color: '#6b21a8', marginBottom: '12px' }}>
+              Forever loved by {userEmail?.split('@')[0] || 'you'}
+            </p>
+            <p style={{ fontSize: '14px', color: '#7c3aed', marginBottom: '6px', fontWeight: '600' }}>
+              This is a Memorial Account
+            </p>
+            <p style={{ fontSize: '14px', color: '#7c3aed' }}>
+              You can still view {selectedPet?.name}'s history and memories, but editing is limited.
+            </p>
+          </div>
+        )}
+        
+        {/* Pet Name */}
+        <div style={{ marginBottom: '16px' }}>
+          <label style={{ fontSize: '14px', fontWeight: '500', color: '#4b5563', marginBottom: '4px', display: 'block' }}>
+            Pet Name *
+          </label>
+          <input
+            type="text"
+            value={petName}
+            onChange={(e) => setPetName(e.target.value)}
+            placeholder="e.g. Buddy"
+            disabled={!!isCurrentPetMemorial}
+            style={{
+              border: '1px solid #d1d5db',
+              padding: '8px',
+              borderRadius: '8px',
+              fontSize: '14px',
+              width: '100%',
+              boxSizing: 'border-box',
+              opacity: isCurrentPetMemorial ? 0.6 : 1,
+              cursor: isCurrentPetMemorial ? 'not-allowed' : 'text',
+            }}
+          />
+        </div>
+
+        {/* Type and Age - Side by side */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
           <div>
             <label style={{ fontSize: '14px', fontWeight: '500', color: '#4b5563', marginBottom: '4px', display: 'block' }}>
-              Pet Name *
+              Type
             </label>
-            <input
-              type="text"
-              value={petName}
-              onChange={(e) => setPetName(e.target.value)}
-              placeholder="e.g. Buddy"
+            <select
+              value={petType}
+              onChange={(e) => setPetType(e.target.value)}
+              disabled={!!isCurrentPetMemorial}
               style={{
                 border: '1px solid #d1d5db',
                 padding: '8px',
@@ -266,64 +365,25 @@ const PetProfile: React.FC = () => {
                 fontSize: '14px',
                 width: '100%',
                 boxSizing: 'border-box',
+                backgroundColor: 'white',
+                opacity: isCurrentPetMemorial ? 0.6 : 1,
+                cursor: isCurrentPetMemorial ? 'not-allowed' : 'pointer',
               }}
-            />
+            >
+              <option value="Dog">Dog</option>
+              <option value="Cat">Cat</option>
+            </select>
           </div>
-
-          {/* Type and Age */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-            <div>
-              <label style={{ fontSize: '14px', fontWeight: '500', color: '#4b5563', marginBottom: '4px', display: 'block' }}>
-                Type
-              </label>
-              <select
-                value={petType}
-                onChange={(e) => setPetType(e.target.value)}
-                style={{
-                  border: '1px solid #d1d5db',
-                  padding: '8px',
-                  borderRadius: '8px',
-                  fontSize: '14px',
-                  width: '100%',
-                  boxSizing: 'border-box',
-                  backgroundColor: 'white',
-                }}
-              >
-                <option value="Dog">Dog</option>
-                <option value="Cat">Cat</option>
-              </select>
-            </div>
-            <div>
-              <label style={{ fontSize: '14px', fontWeight: '500', color: '#4b5563', marginBottom: '4px', display: 'block' }}>
-                Age (Years)
-              </label>
-              <input
-                type="number"
-                value={petAge}
-                onChange={(e) => setPetAge(e.target.value)}
-                placeholder="0"
-                style={{
-                  border: '1px solid #d1d5db',
-                  padding: '8px',
-                  borderRadius: '8px',
-                  fontSize: '14px',
-                  width: '100%',
-                  boxSizing: 'border-box',
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Breed */}
           <div>
             <label style={{ fontSize: '14px', fontWeight: '500', color: '#4b5563', marginBottom: '4px', display: 'block' }}>
-              Breed
+              Age (Years)
             </label>
             <input
-              type="text"
-              value={petBreed}
-              onChange={(e) => setPetBreed(e.target.value)}
-              placeholder="e.g. Golden Retriever"
+              type="number"
+              value={petAge}
+              onChange={(e) => setPetAge(e.target.value)}
+              placeholder="0"
+              disabled={!!isCurrentPetMemorial}
               style={{
                 border: '1px solid #d1d5db',
                 padding: '8px',
@@ -331,37 +391,67 @@ const PetProfile: React.FC = () => {
                 fontSize: '14px',
                 width: '100%',
                 boxSizing: 'border-box',
+                opacity: isCurrentPetMemorial ? 0.6 : 1,
+                cursor: isCurrentPetMemorial ? 'not-allowed' : 'text',
               }}
             />
           </div>
         </div>
+
+        {/* Breed */}
+        <div style={{ marginBottom: '16px' }}>
+          <label style={{ fontSize: '14px', fontWeight: '500', color: '#4b5563', marginBottom: '4px', display: 'block' }}>
+            Breed
+          </label>
+          <input
+            type="text"
+            value={petBreed}
+            onChange={(e) => setPetBreed(e.target.value)}
+            placeholder="e.g. Golden Retriever"
+            disabled={!!isCurrentPetMemorial}
+            style={{
+              border: '1px solid #d1d5db',
+              padding: '8px',
+              borderRadius: '8px',
+              fontSize: '14px',
+              width: '100%',
+              boxSizing: 'border-box',
+              opacity: isCurrentPetMemorial ? 0.6 : 1,
+              cursor: isCurrentPetMemorial ? 'not-allowed' : 'text',
+            }}
+          />
+        </div>
         
         {/* Buttons */}
-        <div style={{ display: 'flex', gap: '12px', marginTop: '32px' }}>
-          <button
-            onClick={handleCreateOrUpdate}
-            disabled={loading}
-            style={{
-              flex: 1,
-              backgroundColor: '#2563eb',
-              color: 'white',
-              padding: '12px',
-              borderRadius: '12px',
-              fontWeight: 'bold',
-              border: 'none',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              opacity: loading ? 0.5 : 1,
-            }}
-          >
-            <Save size={20} />
-            {loading ? 'Saving...' : (selectedPet ? 'Update Pet' : 'Save New Pet')}
-          </button>
+        <div style={{ display: 'flex', gap: '12px', marginTop: '32px', flexWrap: 'wrap' }}>
+          {/* Update/Save Button - Disabled if memorial */}
+          {!isCurrentPetMemorial && (
+            <button
+              onClick={handleCreateOrUpdate}
+              disabled={loading}
+              style={{
+                flex: selectedPet ? 1 : undefined,
+                backgroundColor: '#2563eb',
+                color: 'white',
+                padding: '12px',
+                borderRadius: '12px',
+                fontWeight: 'bold',
+                border: 'none',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                opacity: loading ? 0.5 : 1,
+              }}
+            >
+              <Save size={20} />
+              {loading ? 'Saving...' : (selectedPet ? 'Update Pet' : 'Save New Pet')}
+            </button>
+          )}
 
-          {selectedPet && (
+          {/* Delete Button - Only show if NOT memorial */}
+          {selectedPet && !isCurrentPetMemorial && (
             <button
               onClick={handleDeletePet}
               disabled={loading}
@@ -382,6 +472,36 @@ const PetProfile: React.FC = () => {
             >
               <Trash2 size={20} />
               Delete
+            </button>
+          )}
+
+          {/* ✅ NEW: Memorial Toggle Button */}
+          {selectedPet && (
+            <button
+              onClick={() => handleToggleMemorial(selectedPet.id)}
+              style={{
+                backgroundColor: isCurrentPetMemorial ? '#d8b4fe' : '#f3e8ff',
+                color: isCurrentPetMemorial ? '#6b21a8' : '#7c3aed',
+                padding: '12px 24px',
+                borderRadius: '12px',
+                fontWeight: 'bold',
+                border: isCurrentPetMemorial ? '2px solid #d8b4fe' : '2px solid #c084fc',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                transition: 'all 0.2s',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = isCurrentPetMemorial ? '#e9d5ff' : '#ede9fe';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = isCurrentPetMemorial ? '#d8b4fe' : '#f3e8ff';
+              }}
+            >
+              <span style={{ fontSize: '18px' }}>💜</span>
+              {isCurrentPetMemorial ? 'Remove Memorial' : 'Mark as Memorial'}
             </button>
           )}
         </div>

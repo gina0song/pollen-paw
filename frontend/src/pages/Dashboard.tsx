@@ -157,7 +157,7 @@ const Dashboard: React.FC = () => {
           <p>Track your pet's health today</p>
         </div>
         <div className="welcome-avatar">
-          <div className="avatar-circle"></div>
+          {/* <div className="avatar-circle"></div> */}
         </div>
       </div>
 
@@ -308,8 +308,9 @@ const Dashboard: React.FC = () => {
                     position: 'absolute',
                     top: '-8px',
                     right: '-8px',
-                    width: '28px',
-                    height: '28px',
+                    width: '25px',
+                    height: '25px',
+                    padding: '0',
                     borderRadius: '50%',
                     backgroundColor: '#dc2626',
                     color: 'white',
