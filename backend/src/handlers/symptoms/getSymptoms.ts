@@ -16,7 +16,6 @@ export const handler: APIGatewayProxyHandler = async (event): Promise<APIGateway
     const userId = parseInt(event.queryStringParameters?.userId || "1", 10);
     console.log('🔍 Querying symptoms - petId:', petId, ', userId:', userId);
 
-
     const result = await query(
       `SELECT
         s.id,
@@ -43,6 +42,8 @@ export const handler: APIGatewayProxyHandler = async (event): Promise<APIGateway
       [petId, userId]
     );
 
+    console.log('✅ Found', result.rows.length, 'symptoms');
+
     const enrichedRows = result.rows.map(row => ({
       ...row,
       photoUrl: row.photoUrl || "", 
@@ -62,6 +63,7 @@ export const handler: APIGatewayProxyHandler = async (event): Promise<APIGateway
     };
 
   } catch (error: any) {
+    console.error('❌ getSymptoms error:', error);
     return {
       statusCode: 500,
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
