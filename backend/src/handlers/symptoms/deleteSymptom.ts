@@ -21,8 +21,22 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       };
     }
 
-    // TODO: Verify user owns the pet that owns this symptom
-    const userId = event.requestContext.authorizer?.lambda?.userId || 1;
+    // ✅ FIXED: Get userId from query params
+    let userId: any = event.queryStringParameters?.userId;
+
+    if (!userId) {
+      return {
+        statusCode: 401,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
+        body: JSON.stringify({ message: 'User ID is required' }),
+      };
+    }
+
+    userId = parseInt(userId);
+    console.log(`Deleting symptom ${symptomId} for user ${userId}`);
 
     // Delete symptom log (verify ownership through pet)
     const result = await query(
@@ -40,9 +54,11 @@ export const handler: APIGatewayProxyHandler = async (event) => {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',
         },
-        body: JSON.stringify({ message: 'Symptom log not found' }),
+        body: JSON.stringify({ message: 'Symptom log not found or unauthorized' }),
       };
     }
+
+    console.log(`✅ Symptom ${symptomId} deleted successfully`);
 
     return {
       statusCode: 200,

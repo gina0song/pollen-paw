@@ -1,5 +1,5 @@
 // ============================================
-// Symptom Service - FIXED VERSION
+// Symptom Service - FINAL FIX VERSION
 // Handles all symptom-related API calls
 // ============================================
 
@@ -23,7 +23,6 @@ export const symptomService = {
     try {
       if (!petId) return [];
 
-      // ✅ 修复：获取当前用户的 userId 并传给后端
       const user = authService.getCurrentUser();
       const userId = user?.id;
 
@@ -47,7 +46,7 @@ export const symptomService = {
     }
   },
 
-/**
+  /**
    * Create a new symptom log
    */
   createSymptom: async (data: CreateSymptomRequest): Promise<SymptomLog> => {
@@ -79,25 +78,51 @@ export const symptomService = {
   },
 
   /**
-   * Delete a symptom log
+   * Delete a symptom log - FINAL FIX VERSION
    */
   deleteSymptom: async (id: number): Promise<void> => {
     try {
-      await api.delete(`/symptoms/${id}`);
+      // ✅ FINAL FIX: Directly read from localStorage to ensure we get the userId
+      const userStr = localStorage.getItem('user');
+      
+      if (!userStr) {
+        throw new Error('User not authenticated');
+      }
+
+      let user;
+      try {
+        user = JSON.parse(userStr);
+      } catch (parseError) {
+        console.error('Failed to parse user data:', userStr);
+        throw new Error('Invalid user data');
+      }
+
+      const userId = user?.id;
+
+      if (!userId) {
+        throw new Error('User ID not found in localStorage');
+      }
+
+      console.log(`🚀 Deleting symptom ${id} for user ${userId}`);
+      
+      // ✅ Add userId as query parameter
+      await api.delete(`/symptoms/${id}?userId=${userId}`);
+      
+      console.log(`✅ Symptom ${id} deleted successfully`);
     } catch (error: any) {
       console.error('Delete symptom error:', error);
-      throw new Error(error.response?.data?.error || 'Failed to delete symptom');
+      throw new Error(error.response?.data?.message || 'Failed to delete symptom');
     }
   },
 
   /**
-   * Upload photo for symptom - FIXED VERSION
+   * Upload photo for symptom
    */
   uploadPhoto: async (file: File): Promise<string> => {
     try {
       console.log('Uploading photo:', file.name, file.type);
       
-      // ✅ FIXED: Match backend expected field names
+      // ✅ Match backend expected field names
       const presignedResponse = await api.post<{ uploadUrl: string; photoUrl: string; key: string }>('/upload', {
         fileName: file.name,     // Backend expects 'fileName' not 'filename'
         fileType: file.type,     // Backend expects 'fileType' not 'contentType'
@@ -120,7 +145,7 @@ export const symptomService = {
 
       console.log('Photo uploaded successfully:', presignedResponse.photoUrl);
 
-      // ✅ FIXED: Return photoUrl instead of key
+      // ✅ Return photoUrl instead of key
       return presignedResponse.photoUrl;
     } catch (error: any) {
       console.error('Upload photo error:', error);
