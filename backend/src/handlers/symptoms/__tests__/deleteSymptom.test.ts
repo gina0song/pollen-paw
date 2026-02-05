@@ -23,11 +23,12 @@ describe('deleteSymptom Handler', () => {
   it('should successfully delete a log belonging to the authorized user', async () => {
     mockQuery.mockResolvedValueOnce(createMockResult([{ id: 10 }]));
 
+    // ✅ FIX: userId should come from queryStringParameters, not requestContext
     const event = {
       pathParameters: { id: '10' },
-      requestContext: { 
+      queryStringParameters: { userId: '1' },  // ✅ CHANGED HERE
+      requestContext: {
         requestId: 'test-id',
-        authorizer: { lambda: { userId: 1 } } 
       },
     } as unknown as APIGatewayProxyEvent;
 
@@ -42,17 +43,18 @@ describe('deleteSymptom Handler', () => {
   it('should return 404 if log ID does not exist for that user', async () => {
     mockQuery.mockResolvedValueOnce(createMockResult([]));
 
+    // ✅ FIX: userId should come from queryStringParameters
     const event = {
       pathParameters: { id: '999' },
-      requestContext: { 
+      queryStringParameters: { userId: '1' },  // ✅ CHANGED HERE
+      requestContext: {
         requestId: 'test-id',
-        authorizer: { lambda: { userId: 1 } } 
       },
     } as unknown as APIGatewayProxyEvent;
 
     const response = await handler(event, mockContext, () => {});
 
     expect(response?.statusCode).toBe(404);
-    expect(JSON.parse(response!.body).message).toBe('Symptom log not found');
+    expect(JSON.parse(response!.body).message).toBe('Symptom log not found or unauthorized');
   });
 });
