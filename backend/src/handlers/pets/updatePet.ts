@@ -1,6 +1,3 @@
-// ============================================
-// PUT /pets/{id} - Update an existing pet profile
-// ============================================
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { query } from '../../services/db';
 
@@ -46,7 +43,6 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 
    const updateData: UpdatePetBody = JSON.parse(event.body);
 
-   // Validate species if provided
    if (updateData.species && updateData.species !== 'dog' && updateData.species !== 'cat') {
      return {
        statusCode: 400,
@@ -60,11 +56,9 @@ export const handler: APIGatewayProxyHandler = async (event) => {
      };
    }
 
-   // Get userId from request body (sent by frontend)
    const userId = updateData.userId || event.requestContext.authorizer?.lambda?.userId || 1;
    console.log('Updating pet:', petId, 'for userId:', userId);
 
-   // Build dynamic UPDATE query
    const updates: string[] = [];
    const values: any[] = [];
    let paramCount = 1;
@@ -97,7 +91,6 @@ export const handler: APIGatewayProxyHandler = async (event) => {
      updates.push(`medical_notes = $${paramCount++}`);
      values.push(updateData.medical_notes);
    }
-   // Handle is_memorial update
   if (updateData.is_memorial !== undefined) {
       updates.push(`is_memorial = $${paramCount++}`);
       values.push(updateData.is_memorial);
@@ -114,7 +107,6 @@ export const handler: APIGatewayProxyHandler = async (event) => {
      };
    }
 
-   // Add updated_at
    updates.push(`updated_at = CURRENT_TIMESTAMP`);
 
    values.push(petId, userId);

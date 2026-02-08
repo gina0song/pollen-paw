@@ -3,22 +3,21 @@ import { extractPollenValues, combineRecommendations } from './pollenExtractor';
 describe('pollenExtractor', () => {
   describe('extractPollenValues', () => {
     it('should extract all pollen values correctly', () => {
-      // ✅ FIX: Use the plant names that source code expects, not pollen type codes
       const pollenTypeInfo = [
         {
-          code: 'GRAMINALES',  // ← Changed from 'GRASS' to 'GRAMINALES'
+          code: 'GRAMINALES',  
           displayName: 'Grass',
           indexInfo: { value: 3 },
           healthRecommendations: ['Wear sunglasses'],
         },
         {
-          code: 'BIRCH',  // ← Changed from 'TREE' to a specific tree name
+          code: 'BIRCH', 
           displayName: 'Birch',
           indexInfo: { value: 2 },
           healthRecommendations: ['Stay indoors'],
         },
         {
-          code: 'RAGWEED',  // ← Changed from 'WEED' to 'RAGWEED'
+          code: 'RAGWEED', 
           displayName: 'Ragweed',
           indexInfo: { value: 1 },
           healthRecommendations: ['Take medication'],
@@ -38,7 +37,7 @@ describe('pollenExtractor', () => {
     it('should handle missing pollen types with default values', () => {
       const pollenTypeInfo = [
         {
-          code: 'GRAMINALES',  // ← Changed from 'GRASS'
+          code: 'GRAMINALES',  
           displayName: 'Grass',
           indexInfo: { value: 2 },
           healthRecommendations: ['Test'],
@@ -57,12 +56,12 @@ describe('pollenExtractor', () => {
     it('should handle missing indexInfo with default value 0', () => {
       const pollenTypeInfo = [
         {
-          code: 'GRAMINALES',  // ← Changed from 'GRASS'
+          code: 'GRAMINALES',  
           displayName: 'Grass',
           healthRecommendations: ['Test'],
         },
         {
-          code: 'BIRCH',  // ← Changed from 'TREE'
+          code: 'BIRCH', 
           displayName: 'Birch',
           indexInfo: { value: 3 },
         },
@@ -77,7 +76,7 @@ describe('pollenExtractor', () => {
     it('should handle missing healthRecommendations with empty array', () => {
       const pollenTypeInfo = [
         {
-          code: 'GRAMINALES',  // ← Changed from 'GRASS'
+          code: 'GRAMINALES',  
           displayName: 'Grass',
           indexInfo: { value: 2 },
         },
@@ -107,7 +106,7 @@ describe('pollenExtractor', () => {
           indexInfo: { value: 5 },
         },
         {
-          code: 'GRAMINALES',  // ← Changed from 'GRASS'
+          code: 'GRAMINALES', 
           displayName: 'Grass',
           indexInfo: { value: 2 },
         },

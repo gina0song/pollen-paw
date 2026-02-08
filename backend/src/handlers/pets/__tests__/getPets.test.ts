@@ -1,20 +1,16 @@
-// ============================================
-// Integration Test: GET /pets
-// ============================================
+
 import { handler } from '../getPets';
 import { APIGatewayProxyEvent, Context } from 'aws-lambda';
 import { Pool } from 'pg';
 import dotenv from 'dotenv';
 import path from 'path';
 
-// Load environment variables from root .env
 dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
 describe('getPets Handler Integration Test', () => {
   let pool: Pool;
 
   beforeAll(() => {
-    // Initialize connection pool for test verification
     pool = new Pool({
       host: process.env.DB_HOST,
       port: parseInt(process.env.DB_PORT || '5432'),
@@ -25,12 +21,10 @@ describe('getPets Handler Integration Test', () => {
   });
 
   afterAll(async () => {
-    // Clean up connections
     await pool.end();
   });
 
   it('should return 200 and a list of pets for user_id 1', async () => {
-    // Mock API Gateway event
     const event = {
       httpMethod: 'GET',
       path: '/pets',
@@ -49,10 +43,8 @@ describe('getPets Handler Integration Test', () => {
 
     const context = {} as Context;
 
-    // Execute handler
     const response = await handler(event, context, () => {});
 
-    // Validate response structure
     expect(response).toBeDefined();
     expect(response!.statusCode).toBe(200);
     expect(response!.headers).toMatchObject({
@@ -63,13 +55,11 @@ describe('getPets Handler Integration Test', () => {
     const body = JSON.parse(response!.body);
     expect(Array.isArray(body)).toBe(true);
     
-    // Verify seed data exists
     if (body.length > 0) {
       expect(body[0]).toHaveProperty('id');
       expect(body[0]).toHaveProperty('name');
       expect(body[0]).toHaveProperty('species');
       
-      // Check for Luna (from seed data)
       const hasLuna = body.some((pet: any) => pet.name === 'Luna');
       expect(hasLuna).toBe(true);
     } else {

@@ -1,4 +1,3 @@
-// Utility functions for pollen level calculations
 export function calculatePollenLevel(
   grass: number,
   tree: number,
@@ -12,7 +11,6 @@ export function calculatePollenLevel(
   return 'LOW';
 }
 
-// Function to get the maximum pollen value among the three types
 export function getMaxPollenValue(
   grass: number,
   tree: number,

@@ -1,8 +1,3 @@
-// ============================================
-// Analysis Page - MVP 4: Correlation Analysis Dashboard
-// Shows correlation between symptoms and pollen levels
-// ============================================
-
 import React, { useState, useEffect } from 'react';
 import { AlertCircle, Zap } from 'lucide-react';
 import { Line } from 'react-chartjs-2';

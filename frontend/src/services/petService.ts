@@ -1,8 +1,3 @@
-// ============================================
-// Pet Service
-// Handles all pet-related API calls
-// ============================================
-
 import { api } from './api';
 import { authService } from './authService'; 
 import { Pet, CreatePetRequest } from '../types';
@@ -30,7 +25,6 @@ export const petService = {
       const user = authService.getCurrentUser();
       const userId = user?.id;
 
-      // Pass userId in request body for verification
       await api.delete(`/pets/${id}`, { data: { userId } });
     } catch (error: any) {
       console.error('Delete pet error:', error);

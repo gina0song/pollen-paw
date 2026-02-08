@@ -1,8 +1,3 @@
-// ============================================
-// Main App Component
-// React Router configuration and protected routes
-// ============================================
-
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/layout/Layout';
@@ -16,10 +11,7 @@ import Register from './pages/Register';
 import { authService } from './services/authService';
 import './App.css';
 
-/**
- * Protected Route Component
- * Redirects to login if user is not authenticated
- */
+
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const isAuthenticated = authService.isAuthenticated();
   

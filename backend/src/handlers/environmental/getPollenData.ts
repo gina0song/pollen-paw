@@ -6,7 +6,7 @@ import { formatApiDate } from '../../utils/dateFormatter';
 
 const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
 
-interface PollenForecast { // Define structure for daily pollen forecast
+interface PollenForecast {
   date: string;
   grassPollen: number;
   treePollen: number;
@@ -15,7 +15,7 @@ interface PollenForecast { // Define structure for daily pollen forecast
   healthRecommendations: string[];
 }
 
-interface PollenResponse { // Define structure for the full API response
+interface PollenResponse {
   zipCode: string;
   location: string;
   coordinates: {
@@ -24,14 +24,12 @@ interface PollenResponse { // Define structure for the full API response
   };
   forecast: PollenForecast[];
 }
-// Lambda handler function to get pollen data based on ZIP code
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   console.log('Received event:', JSON.stringify(event));
 
   try {
-    // Validate input
     const zipCode = event.queryStringParameters?.zipCode;
     if (!zipCode) {
       return {
@@ -47,7 +45,6 @@ export const handler = async (
       };
     }
 
-    // Step 1: Get coordinates from ZIP code using Geocoding API
     console.log('Fetching coordinates for ZIP code:', zipCode);
     const geocodingUrl = 'https://maps.googleapis.com/maps/api/geocode/json';
     const geocodingResponse = await axios.get(geocodingUrl, {
@@ -56,12 +53,11 @@ export const handler = async (
         key: GOOGLE_MAPS_API_KEY,
       },
     });
-    // Validate geocoding response
     if (
       geocodingResponse.data.status !== 'OK' ||
       !geocodingResponse.data.results.length
     ) {
-      return { // Return 404 if ZIP code is invalid
+      return { 
         statusCode: 404,
         headers: {
           'Content-Type': 'application/json',
@@ -73,37 +69,30 @@ export const handler = async (
         }),
       };
     }
-    // Extract latitude and longitude
     const location = geocodingResponse.data.results[0];
     const { lat, lng } = location.geometry.location;
     const formattedAddress = location.formatted_address;
 
     console.log('Coordinates found:', { lat, lng, formattedAddress });
 
-    // Step 2: Get pollen data using Pollen API
     console.log('Fetching pollen data for coordinates:', { lat, lng });
     const pollenUrl = `https://pollen.googleapis.com/v1/forecast:lookup?key=${GOOGLE_MAPS_API_KEY}&location.latitude=${lat}&location.longitude=${lng}&days=5`;
 
-    const pollenResponse = await axios.get(pollenUrl); // Fetch pollen data
+    const pollenResponse = await axios.get(pollenUrl); 
     console.log('Pollen API response:', JSON.stringify(pollenResponse.data));
 
-    // Step 3: Transform data using utility functions
     const forecast: PollenForecast[] = pollenResponse.data.dailyInfo.map(
       (day: any) => {
-        // Extract pollen values using utility
         const extracted = extractPollenValues(day.pollenTypeInfo);
 
-        // Calculate pollen level using utility
         const pollenLevel = calculatePollenLevel(
           extracted.grassPollen,
           extracted.treePollen,
           extracted.weedPollen
         );
 
-        // Combine recommendations using utility
         const healthRecommendations = combineRecommendations(extracted);
 
-        // Format date using utility
         const formattedDate = formatApiDate(day.date);
 
         return {
@@ -117,7 +106,6 @@ export const handler = async (
       }
     );
 
-    // Step 4: Return response
     const response: PollenResponse = {
       zipCode,
       location: formattedAddress,
@@ -136,9 +124,7 @@ export const handler = async (
   } catch (error: any) {
     console.error('Error fetching pollen data:', error);
 
-    // Handle different error types
     if (error.response) {
-      // API error
       return {
         statusCode: error.response.status || 500,
         headers: {
@@ -152,7 +138,6 @@ export const handler = async (
       };
     }
 
-    // Generic error
     return {
       statusCode: 500,
       headers: {

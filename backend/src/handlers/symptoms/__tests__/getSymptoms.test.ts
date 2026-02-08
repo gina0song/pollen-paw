@@ -2,14 +2,12 @@ import { handler } from '../getSymptoms';
 import { APIGatewayProxyEvent, Context } from 'aws-lambda';
 import { query } from '../../../services/db';
 
-// Mock the database query function
 jest.mock('../../../services/db');
 const mockQuery = query as jest.MockedFunction<typeof query>;
 
 describe('getSymptoms Handler', () => {
   const mockContext = {} as Context;
 
-  // Helper function to create a mock result matching pg library format
   const createMockResult = (rows: any[]) => ({ 
     rows,
     rowCount: rows.length,
@@ -19,14 +17,13 @@ describe('getSymptoms Handler', () => {
   } as any);
 
   it('should return enriched symptoms with pollen data', async () => {
-    // Mock the data structure returned after SQL JOIN
     const mockDbRows = [
       { 
         id: 1, 
         petId: 1, 
         logDate: '2026-01-27', 
         eyeSymptoms: 4, 
-        treePollen: 8.5, // Mock data from environmental_data table
+        treePollen: 8.5, 
         grassPollen: 3.0,
         weedPollen: 1.5,
         airQuality: 70
@@ -48,9 +45,7 @@ describe('getSymptoms Handler', () => {
     expect(response?.statusCode).toBe(200);
     const body = JSON.parse(response!.body);
     
-    // Verify the length of the returned data
     expect(body).toHaveLength(1);
-    // Verify that pollen_data is correctly restructured
     expect(body[0].pollen_data).toEqual({
       treePollen: 8.5,
       grassPollen: 3.0,

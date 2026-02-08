@@ -83,7 +83,28 @@ The app will open at **http://localhost:3000**
 
 ---
 
-## 📖 How to Use
+## 📖 Documentation
+
+### For Frontend Developers
+**→ See [`frontend/README.md`](./frontend/README.md)**
+
+Detailed guide including:
+- Installation steps
+- Project structure
+- All 7 pages explained
+- API service layer documentation
+- Code examples
+- Testing guide
+- Troubleshooting
+- Deployment options
+
+### For Backend/Infrastructure
+- Backend and database documentation provided separately
+- API endpoints overview below
+
+---
+
+## 📋 How to Use Pollen Paw
 
 ### 1. Register & Login
 - Sign up with your email and ZIP code
@@ -224,74 +245,7 @@ Display in React Component
 
 ---
 
-## 🖥️ Frontend Setup Details
-
-### Environment Variables
-
-Create `.env` file in `/frontend` directory:
-
-```bash
-REACT_APP_API_URL=https://your-api-id.execute-api.us-east-2.amazonaws.com/dev
-```
-
-See `.env.example` for template.
-
-### Available Scripts
-
-```bash
-# Start development server
-npm start
-
-# Build for production
-npm run build
-
-# Run tests
-npm test
-
-# Run linter
-npm run lint
-```
-
-### Key Components Explained
-
-**Dashboard**
-- Statistics cards (days logged, avg pollen, avg symptoms)
-- Current pollen levels visualization
-- Recent symptom logs with photos
-- Quick action button to log symptoms
-
-**Log Symptoms**
-- Pet selector dropdown
-- 4 symptom sliders (Eye, Fur, Skin, Respiratory)
-- Photo upload with preview
-- Notes field for additional context
-
-**Analysis**
-- Interactive time-series chart
-- Blue line: symptom severity over time
-- Orange line: pollen levels over time
-- Correlation coefficients for each pollen type
-- Insights section with key findings
-
-**AI Insights**
-- Automatically detected patterns
-- Top trigger allergen identification
-- Severity threshold recommendations
-- Actionable health advice
-
----
-
-## 🎨 UI/UX Design
-
-- **Mobile-first responsive design** - Works on all devices
-- **Accessibility** - Clear labels, good contrast, keyboard navigation
-- **Consistent styling** - CSS variables for colors and spacing
-- **Interactive charts** - Hover for details, responsive sizing
-- **Intuitive navigation** - Bottom nav for main pages, clear icons
-
----
-
-## 📋 API Endpoints Overview
+## 📱 API Endpoints Overview
 
 All endpoints require JWT token in header: `Authorization: Bearer <token>`
 
@@ -321,40 +275,21 @@ All endpoints require JWT token in header: `Authorization: Bearer <token>`
 
 ---
 
-## 🐛 Troubleshooting
+## 🎨 UI/UX Design
 
-### Issue: "Cannot find backend API"
-**Solution:**
-- Check `.env` file exists in `/frontend`
-- Verify `REACT_APP_API_URL` is correct
-- Restart dev server: `npm start`
-- Check backend is running on AWS
-
-### Issue: "401 Unauthorized"
-**Solution:**
-- Try logging in again
-- Clear localStorage in browser DevTools
-- Check token exists: `localStorage.getItem('token')`
-
-### Issue: Photos not uploading
-**Solution:**
-- Check file size is under 5MB
-- Verify S3 upload permissions (backend config)
-- Check browser console for error details
-
-### Issue: Charts not showing data
-**Solution:**
-- Need at least 2 symptom logs to see trends
-- Check backend returned data: `Network` tab in DevTools
-- Verify correlation API endpoint is accessible
+- **Mobile-first responsive design** - Works on all devices
+- **Accessibility** - Clear labels, good contrast, keyboard navigation
+- **Consistent styling** - CSS variables for colors and spacing
+- **Interactive charts** - Hover for details, responsive sizing
+- **Intuitive navigation** - Bottom nav for main pages, clear icons
 
 ---
 
-## 📚 Additional Resources
+## 📚 Additional Documentation
 
-- **Frontend README** - See `/frontend/README.md` for detailed frontend documentation
-- **Local Testing Guide** - See backend docs for testing instructions
-- **Database Schema** - Ask instructor for schema documentation
+- **Frontend Setup & Development** → [`frontend/README.md`](./frontend/README.md)
+- **Backend Testing** → See backend docs for testing instructions
+- **Environment Variables** → See `.env.example` in `/frontend`
 
 ---
 
@@ -385,16 +320,28 @@ MIT License - Free to use for learning and demonstration purposes.
 - Mobile app (React Native)
 - Multiple location tracking
 - Breed-specific recommendations
+- Seasonal pattern analysis
 
 ---
 
 ## 🆘 Need Help?
 
-1. **Check the README** - You're reading it!
-2. **Frontend README** - See `/frontend/README.md`
-3. **Browser Console** - Look for error messages
-4. **Network Tab** - Check API responses
-5. **Ask instructor** - Backend/AWS configuration questions
+1. **Frontend questions** → Check [`frontend/README.md`](./frontend/README.md)
+2. **See detailed docs** → Navigate to that section for comprehensive guides
+3. **Browser console** → Look for error messages
+4. **Network tab** → Check API responses (F12 → Network tab)
+5. **Ask instructor** → Backend/AWS configuration questions
+
+---
+
+## ✅ Quick Checklist
+
+Before using:
+- [ ] Node.js 18+ installed
+- [ ] Backend API URL obtained from instructor
+- [ ] Frontend installed: `npm install` in `/frontend`
+- [ ] Environment configured: `.env` file created
+- [ ] Backend running and accessible
 
 ---
 

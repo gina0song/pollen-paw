@@ -51,14 +51,12 @@ const LogSymptoms: React.FC = () => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // 格式检查
     const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
     if (!allowedTypes.includes(file.type.toLowerCase())) {
         alert("Unsupported format. Please use JPG or PNG.");
         return;
     }
 
-    // 🚩 自动压缩逻辑：解决 IMG_0511 (2.1MB) 上传失败问题
     const img = new Image();
     img.src = URL.createObjectURL(file);
     img.onload = () => {
@@ -166,7 +164,6 @@ const LogSymptoms: React.FC = () => {
             <div className="symptom-header">
               <span className="symptom-name">{category.name}</span>
             </div>
-            {/* 🚩 关键修复：使用 Flex 布局强制拉开间距，解决“15”重叠 */}
             <div className="slider-container" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <span>1</span>
               <input 

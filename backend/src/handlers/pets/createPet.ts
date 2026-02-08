@@ -29,7 +29,6 @@ export const handler: APIGatewayProxyHandler = async (event): Promise<APIGateway
       };
     }
 
-    // 优先使用前端传来的 userId，如果没有则尝试从 authorizer 拿
     const userId = petData.userId || event.requestContext.authorizer?.lambda?.userId || 1;
 
     const result = await query(

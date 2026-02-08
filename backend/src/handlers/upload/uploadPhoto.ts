@@ -1,7 +1,3 @@
-// ============================================
-// POST /upload - Generate presigned URL for S3 upload
-// ============================================
-// This allows frontend to upload photos directly to S3
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
@@ -12,7 +8,7 @@ const s3Client = new S3Client({ region: process.env.AWS_REGION || 'us-east-1' })
 interface UploadRequest {
   fileName: string;
   fileType: string;
-  petId?: number; // Optional: for organizing photos by pet
+  petId?: number; 
 }
 
 export const handler: APIGatewayProxyHandler = async (event) => {
@@ -32,7 +28,6 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 
     const uploadData: UploadRequest = JSON.parse(event.body);
 
-    // Validate required fields
     if (!uploadData.fileName || !uploadData.fileType) {
       return {
         statusCode: 400,
@@ -46,7 +41,6 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       };
     }
 
-    // Validate file type (only images)
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     if (!allowedTypes.includes(uploadData.fileType.toLowerCase())) {
       return {
@@ -61,7 +55,6 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       };
     }
 
-    // Generate unique file name
     const fileExtension = uploadData.fileName.split('.').pop();
     const uniqueId = randomBytes(16).toString('hex');
     const timestamp = Date.now();
@@ -75,7 +68,6 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       throw new Error('S3_BUCKET environment variable not set');
     }
 
-    // Create presigned URL for upload
     const command = new PutObjectCommand({
       Bucket: bucket,
       Key: s3Key,
@@ -83,10 +75,9 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     });
 
     const uploadUrl = await getSignedUrl(s3Client, command, { 
-      expiresIn: 300 // URL expires in 5 minutes
+      expiresIn: 300 
     });
 
-    // Construct the final photo URL (what will be saved in database)
     const photoUrl = `https://${bucket}.s3.${process.env.AWS_REGION || 'us-east-1'}.amazonaws.com/${s3Key}`;
 
     return {
@@ -96,8 +87,8 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         'Access-Control-Allow-Origin': '*',
       },
       body: JSON.stringify({
-        uploadUrl,  // Use this URL to PUT the file
-        photoUrl,   // Save this URL in your database
+        uploadUrl,  
+        photoUrl,   
         key: s3Key,
       }),
     };

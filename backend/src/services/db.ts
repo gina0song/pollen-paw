@@ -11,15 +11,13 @@ const pool = new Pool({
   database: process.env.DB_NAME,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
- // For AWS RDS with self-signed certificates
   ssl: {
     rejectUnauthorized: false
   }
 });
 
-console.log("LOG_CHECK: Connection Pool initialized with SSL!"); // Debug log
+console.log("LOG_CHECK: Connection Pool initialized with SSL!");
 
-// Handle unexpected errors on idle clients
 pool.on('error', (err) => {
   console.error('Unexpected error on idle client', err);
 });

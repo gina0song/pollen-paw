@@ -1,8 +1,3 @@
-// ============================================
-// API Service - Axios configuration
-// 连接至 AWS  API Gateway
-// ============================================
-
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 
 const API_BASE_URL = 'https://fhykriij99.execute-api.us-east-2.amazonaws.com/dev';

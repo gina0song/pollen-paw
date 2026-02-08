@@ -13,14 +13,12 @@ const Register: React.FC = () => {
     e.preventDefault();
     try {
       setLoading(true);
-      // FIX: Use zipCode (camelCase) and include password to match RegisterRequest
       await authService.register({ 
         email, 
         zipCode, 
         password: 'simulated_password' 
       });
       
-      // Auto-login after registration
       await authService.login({ 
         email, 
         password: 'simulated_password' 

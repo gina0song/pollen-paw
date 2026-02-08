@@ -73,7 +73,7 @@ describe('updateSymptom Handler', () => {
   });
 
   it('should return 404 if log not found or user lacks permission', async () => {
-    mockQuery.mockResolvedValueOnce(createMockResult([])); // No result found
+    mockQuery.mockResolvedValueOnce(createMockResult([]));
 
     const event = {
       pathParameters: { id: '999' },
@@ -99,14 +99,13 @@ describe('updateSymptom Handler', () => {
           lambda: { userId: 1 } 
         } 
       },
-      body: JSON.stringify({}), // Empty update
+      body: JSON.stringify({}), 
     } as unknown as APIGatewayProxyEvent;
 
     const response = await handler(event, mockContext, () => {});
 
     expect(response?.statusCode).toBe(400);
     const body = JSON.parse(response!.body);
-    // ✅ FIX: Source code returns "No fields to update", not "No valid fields to update"
     expect(body.message).toBe('No fields to update');
   });
 });

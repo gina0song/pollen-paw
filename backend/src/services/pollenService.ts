@@ -1,8 +1,3 @@
-// ============================================
-// Pollen Service
-// Fetches pollen data from Google Pollen API and stores in database
-// ============================================
-
 import axios from 'axios';
 import { query } from './db';
 import { extractPollenValues } from '../utils/pollenExtractor';
@@ -13,7 +8,6 @@ export async function getHistoricalPollen(dateStr: string, zipCode: string) {
     console.log(`[PollenService] Start for ZIP: ${zipCode}, Date: ${dateStr}`);
     console.log(`[PollenService] API_KEY check: ${apiKey ? 'Present (First 5: ' + apiKey.substring(0, 5) + '...)' : 'MISSING'}`);
 
-    // 1. Attempt to fetch from local RDS database first (cost-saving)
     const dbResult = await query(
       `SELECT tree_pollen, grass_pollen, weed_pollen, air_quality
        FROM environmental_data
@@ -32,7 +26,6 @@ export async function getHistoricalPollen(dateStr: string, zipCode: string) {
       };
     }
 
-    // 2. Fallback to Google Pollen API
     if (!apiKey) {
       console.error('[PollenService] Cannot call Google API: Missing API Key in environment');
       return null;
@@ -40,7 +33,6 @@ export async function getHistoricalPollen(dateStr: string, zipCode: string) {
 
     console.log(`[PollenService] Cache miss. Calling Google Geocoding for ${zipCode}...`);
 
-    // Step A: Geocode ZIP code to coordinates
     const geocodingUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${zipCode}&key=${apiKey}`;
     const geoRes = await axios.get(geocodingUrl);
 
@@ -52,8 +44,6 @@ export async function getHistoricalPollen(dateStr: string, zipCode: string) {
     const { lat, lng } = geoRes.data.results[0].geometry.location;
     console.log(`[PollenService] Coordinates found: ${lat}, ${lng}`);
 
-    // Step B: Fetch forecast from Google Pollen API
-    // ✅ FIXED: Using forecast:lookup with plantsDescription=true to get plantInfo
     const pollenUrl = `https://pollen.googleapis.com/v1/forecast:lookup?key=${apiKey}&location.latitude=${lat}&location.longitude=${lng}&days=1&plantsDescription=true`;
     
     console.log(`[PollenService] Calling Google Pollen API...`);
@@ -67,9 +57,6 @@ export async function getHistoricalPollen(dateStr: string, zipCode: string) {
     const dailyInfo = pollenRes.data.dailyInfo[0];
     console.log(`[PollenService] Received dailyInfo for date: ${dailyInfo.date.year}-${dailyInfo.date.month}-${dailyInfo.date.day}`);
 
-    // ✅ FIXED: Extract from plantInfo instead of pollenTypeInfo
-    // plantInfo contains individual plants with their indexInfo values
-    // We group them by type (TREE/GRASS/WEED) and average the values
     if (!dailyInfo.plantInfo || dailyInfo.plantInfo.length === 0) {
       console.warn(`[PollenService] Google Pollen API returned no plantInfo`);
       return null;
@@ -78,7 +65,6 @@ export async function getHistoricalPollen(dateStr: string, zipCode: string) {
     const extracted = extractPollenValues(dailyInfo.plantInfo);
     console.log(`[PollenService] Successfully extracted data:`, extracted);
 
-    // ✅ Save to database for future cache hits
     try {
       await query(
         `INSERT INTO environmental_data (zip_code, date, tree_pollen, grass_pollen, weed_pollen)

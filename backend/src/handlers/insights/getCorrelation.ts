@@ -155,7 +155,6 @@ export const handler: APIGatewayProxyHandler = async (event): Promise<APIGateway
 
     console.log(`Found ${daysLogged} symptom logs for pet ${petId}`);
 
-    // ✅ Cold start protection: require minimum 3 days
     if (daysLogged < 3) {
       const daysNeeded = 3 - daysLogged;
       console.log(`⚠️ Insufficient data: need ${daysNeeded} more days`);
@@ -173,7 +172,6 @@ export const handler: APIGatewayProxyHandler = async (event): Promise<APIGateway
       };
     }
 
-    // ✅ Calculate symptom severity using dynamic average (only non-zero symptoms)
     const chartData: ChartDataPoint[] = logs.map(log => ({
       date: log.log_date,
       symptomSeverity: calculateSymptomSeverity(
@@ -189,25 +187,21 @@ export const handler: APIGatewayProxyHandler = async (event): Promise<APIGateway
 
     const symptomSeverities = chartData.map(d => d.symptomSeverity);
 
-    // ✅ Extract pollen arrays
     const treePollenArray = chartData.map(d => d.treePollen);
     const grassPollenArray = chartData.map(d => d.grassPollen);
     const weedPollenArray = chartData.map(d => d.weedPollen);
 
-    // ✅ Calculate Pearson correlations for all three pollen types
     const treeCorr = pearson(symptomSeverities, treePollenArray);
     const grassCorr = pearson(symptomSeverities, grassPollenArray);
     const weedCorr = pearson(symptomSeverities, weedPollenArray);
 
     console.log(`📈 Correlations - Tree: ${treeCorr.toFixed(2)}, Grass: ${grassCorr.toFixed(2)}, Weed: ${weedCorr.toFixed(2)}`);
 
-    // ✅ Find top trigger
     const topTrigger = findTopTrigger(treeCorr, grassCorr, weedCorr);
     const topTriggerName = formatPollenName(topTrigger.type);
 
     console.log(`🎯 Top trigger: ${topTriggerName} (r=${topTrigger.value.toFixed(2)})`);
 
-    // ✅ Generate insights based on top trigger (using fetched pet name)
     const topTriggerInsight = `${petName}'s symptoms highly correlate with ${topTriggerName} (r=${topTrigger.value.toFixed(2)})`;
     
     const thresholdInsight = `Symptoms appear when ${topTriggerName.toLowerCase()} > 7.0`;
@@ -217,7 +211,7 @@ export const handler: APIGatewayProxyHandler = async (event): Promise<APIGateway
     const response: CorrelationResponse = {
       status: "success",
       daysLogged,
-      petName,  // ✅ Include pet name in response
+      petName,  
       correlations: {
         treeCorr: parseFloat(treeCorr.toFixed(2)),
         grassCorr: parseFloat(grassCorr.toFixed(2)),

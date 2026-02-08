@@ -12,13 +12,11 @@ export async function getAirQuality(lat: number, lng: number, zipCode: string, d
       location: { latitude: lat, longitude: lng }
     });
 
-    // --- 关键调试日志：看看 Google 到底给的是什么 ---
     console.log('[AQI Service] Raw Google Response:', JSON.stringify(response.data));
 
-    // 安全获取索引值
     let aqi = null;
     if (response.data && response.data.indexes && response.data.indexes.length > 0) {
-      aqi = response.data.indexes[0].aqi; // 有时候字段名叫 aqi，有时候叫 value
+      aqi = response.data.indexes[0].aqi;
       if (aqi === undefined) aqi = response.data.indexes[0].value;
     }
 
@@ -29,7 +27,6 @@ export async function getAirQuality(lat: number, lng: number, zipCode: string, d
 
     console.log(`[AQI Service] Found AQI: ${aqi}. Updating Database...`);
 
-    // 存入数据库
     await query(`
       INSERT INTO environmental_data (zip_code, date, air_quality)
       VALUES ($1, $2, $3)

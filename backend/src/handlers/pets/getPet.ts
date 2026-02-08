@@ -1,6 +1,3 @@
-// ============================================
-// GET /pets/{id} - Fetch a single pet by ID
-// ============================================
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { query } from '../../services/db';
 
@@ -21,16 +18,8 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       };
     }
 
-    // for future  JWT : Add userId verification to ensure user owns this pet
-    
-    // for future  JWT : Add userId verification to ensure user owns this pet
-    //const userId = event.requestContext.authorizer?.lambda?.userId;
-// 👆 从 JWT token 中获取真实的用户 ID
+    const userId = event.requestContext.authorizer?.lambda?.userId || 1; 
 
-
-    const userId = event.requestContext.authorizer?.lambda?.userId || 1; // always 1 for now, mock user
-
-    // Query pet by ID and verify ownership
     const result = await query(
       'SELECT * FROM pets WHERE id = $1 AND user_id = $2',
       [petId, userId]

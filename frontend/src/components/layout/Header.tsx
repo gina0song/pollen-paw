@@ -1,19 +1,10 @@
-// ============================================
-// Header Component
-// App header with logo and user info
-// ============================================
-
 import React from 'react';
 import { LogOut } from 'lucide-react';
 import { authService } from '../../services/authService';
-// Styles are imported in App.css
 
 const Header: React.FC = () => {
   const user = authService.getCurrentUser();
 
-  /**
-   * Handle logout
-   */
   const handleLogout = () => {
     if (window.confirm('Are you sure you want to logout?')) {
       authService.logout();

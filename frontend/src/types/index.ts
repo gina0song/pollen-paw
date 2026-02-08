@@ -1,8 +1,3 @@
-// ============================================
-// Type Definitions for Pollen Paw Application
-// Shared between frontend and backend
-// ============================================
-
 
 export interface User {
   id: number;
@@ -27,7 +22,7 @@ export interface Pet {
   medicalNotes?: string;  
   createdAt: Date;
   updatedAt: Date;
-  isMemorial?: boolean;  // ✅ NEW: Memorial account indicator
+  isMemorial?: boolean; 
 }
 
 

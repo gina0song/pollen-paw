@@ -18,37 +18,37 @@ React-based frontend for pet health tracking with pollen correlation analysis.
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Installation
 
 ### Prerequisites
 - Node.js 18+
 - npm or yarn
-- `.env` file with `REACT_APP_API_URL`
+- Backend API URL (ask instructor)
 
-### Installation
+### Step-by-Step Setup
 
 ```bash
-# Navigate to frontend directory
+# 1. Navigate to frontend directory
 cd frontend
 
-# Install dependencies
+# 2. Install dependencies
 npm install
 
-# Create environment file
+# 3. Create environment file
 cp .env.example .env
 
-# Edit .env and add your backend API URL
+# 4. Edit .env with your backend API URL
 # REACT_APP_API_URL=https://your-api-id.execute-api.us-east-2.amazonaws.com/dev
 
-# Start development server
+# 5. Start development server
 npm start
 ```
 
-App opens automatically at `http://localhost:3000`
+The app opens automatically at `http://localhost:3000` ✨
 
 ---
 
-## 📁 Project Structure
+## 📂 Project Structure
 
 ```
 frontend/
@@ -130,7 +130,6 @@ frontend/
 
 **Code:** `src/pages/Analysis.tsx`
 
-
 ### 4. **Pet Profile** (`/pet-profile`)
 **What you can do:**
 - View all your pets
@@ -149,7 +148,7 @@ frontend/
 
 **Code:** `src/pages/Login.tsx`
 
-### 7. **Register** (`/register`)
+### 6. **Register** (`/register`)
 **What it does:**
 - Create new account with email and ZIP code
 - Backend creates user record
@@ -157,6 +156,48 @@ frontend/
 - Redirects to pet setup
 
 **Code:** `src/pages/Register.tsx`
+
+---
+
+## 🧪 Manual Testing Guide
+
+### Quick Test Flow
+
+1. **Start the app**: 
+   ```bash
+   npm start
+   ```
+
+2. **Register a new account**:
+   - Go to `/register`
+   - Enter email: `test@example.com`
+   - Enter ZIP: `96753`
+   - Click "Register"
+
+3. **You'll be auto-logged in and redirected to Dashboard** ✅
+
+4. **Add a pet**:
+   - Go to "Pet Profile" tab
+   - Click the `+` button to add new pet
+   - Fill in: Name, Type, Age, Breed
+   - Click "Save Changes"
+
+5. **Log a symptom**:
+   - Go to "Log Symptoms" tab
+   - Select your pet
+   - (Optional) Upload a photo
+   - Adjust symptom sliders (1-5 for each category)
+   - Add notes
+   - Click "Save Entry"
+
+6. **View your data**:
+   - Go back to Dashboard
+   - See your stats updated
+   - View recent photos
+
+7. **Try other features**:
+   - Go to **Analysis** page - see symptom vs pollen charts
+   - Go to **AI Insights** - see personalized recommendations
 
 ---
 
@@ -168,7 +209,7 @@ Create `.env` file in `/frontend`:
 # Required: Your backend API URL
 REACT_APP_API_URL=https://your-api-id.execute-api.us-east-2.amazonaws.com/dev
 
-# For local backend development:
+# For local backend development (if running locally):
 # REACT_APP_API_URL=http://localhost:3000/dev
 ```
 
@@ -178,7 +219,7 @@ See `.env.example` for template.
 
 ## 🛠️ API Services
 
-All services are in `src/services/`. They handle communication with the backend.
+All services in `src/services/`. They handle communication with the backend.
 
 ### authService.ts
 ```typescript
@@ -415,83 +456,93 @@ const styles = {
 
 ---
 
-## 🧪 Testing
+## 📦 Available Scripts
 
-### Run Tests
 ```bash
+# Start development server
+npm start
+
+# Build for production
+npm run build
+
+# Run tests
 npm test
-```
 
-### Run Specific Test
-```bash
-npm test -- Dashboard.test.tsx
-```
-
-### Generate Coverage Report
-```bash
-npm test -- --coverage
-```
-
----
-
-## 🚀 Building for Production
-
-### Create Optimized Build
-```bash
-npm run build
-```
-
-Output goes to `build/` directory.
-
-### Deploy to Vercel
-```bash
-npx vercel
-```
-
-### Deploy to Netlify
-```bash
-npm run build
-# Upload build/ to Netlify Dashboard
-```
-
-### Deploy to AWS S3 + CloudFront
-```bash
-npm run build
-aws s3 sync build/ s3://your-bucket-name
+# Run linter (if configured)
+npm run lint
 ```
 
 ---
 
 ## 🐛 Common Issues & Solutions
 
-### Issue: "Cannot GET /" after refresh
-**Cause:** React Router not configured for production
-**Solution:** Enable client-side routing on your hosting
-
-### Issue: API calls return 401 Unauthorized
-**Cause:** Token missing or expired
+### Issue: "Cannot find module 'react'"
 **Solution:**
-- Check `.env` has correct API URL
-- Check localStorage has token: `localStorage.getItem('token')`
-- Try logging in again
+```bash
+npm install
+```
 
-### Issue: Photos don't upload
-**Cause:** S3 permissions or file size issue
+### Issue: "REACT_APP_API_URL is not defined"
+**Solution:**
+```bash
+# Check .env exists
+cat .env
+
+# Make sure it has:
+# REACT_APP_API_URL=https://your-api-url/dev
+
+# Restart dev server (IMPORTANT!)
+npm start
+```
+
+### Issue: "API calls return 401 Unauthorized"
+**Solution:**
+- Check if you're logged in
+- Try logging in again
+- Check localStorage has token: `localStorage.getItem('token')`
+- Verify `.env` has correct API URL
+
+### Issue: "Port 3000 already in use"
+**Solution:**
+```bash
+# Find process using port 3000
+lsof -ti:3000
+
+# Kill it
+kill -9 <PID>
+
+# Or use different port
+PORT=3001 npm start
+```
+
+### Issue: "Photos don't upload"
 **Solution:**
 - Check file size < 5MB
 - Check browser console for error
 - Verify backend S3 credentials
 
-### Issue: Charts show "No data"
-**Cause:** Need at least 2 data points
-**Solution:** Log symptoms for 2+ days before viewing analysis
-
-### Issue: Environment variables not loading
-**Cause:** .env file not found or dev server not restarted
+### Issue: "Charts show 'No data'"
 **Solution:**
-- Ensure `.env` exists in `/frontend`
-- Restart `npm start` after changing .env
-- Check file is named exactly `.env` (not `.env.local`)
+- Need at least 2 symptom logs to show trends
+- Log symptoms for 2+ days first
+- Check backend returned data in Network tab (DevTools)
+
+### Issue: "TypeScript errors"
+**Solution:**
+```bash
+npm install --save-dev typescript @types/react @types/react-dom
+npm start
+```
+
+### Issue: "Blank page or infinite redirect loop"
+**Solution:**
+1. Open browser console (F12)
+2. Check for error messages
+3. Most likely causes:
+   - Missing dependencies: `npm install`
+   - Missing .env: `cp .env.example .env`
+   - Backend not running: Check API URL
+   - Token expired: Log in again
 
 ---
 
@@ -574,34 +625,96 @@ interface ChartDataPoint {
 
 ---
 
-## 🔗 Component Communication
+## 🔧 Development Tips
 
-### State Management
-- **Local state:** `useState` hooks in components
-- **Prop drilling:** Pass data to child components
-- **Context:** Could add for global state (auth, theme)
+### Adding New Pages
 
-### Example: Dashboard fetching data
+1. Create component in `src/pages/MyNewPage.tsx`
+2. Add route in `src/App.tsx`
+3. Add navigation item in `src/components/layout/Navigation.tsx`
+4. Create styles in `src/pages/styles/`
+
+### API Calls
+
+Always use service methods from `src/services/`:
+
 ```typescript
-const [pets, setPets] = useState<Pet[]>([])
-const [loading, setLoading] = useState(true)
+import { petService } from '../services/petService';
 
-useEffect(() => {
-  const loadPets = async () => {
-    try {
-      const data = await petService.getPets()
-      setPets(data)
-    } catch (error) {
-      console.error('Failed to load pets:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-  loadPets()
-}, [])
+// Good ✅
+const pets = await petService.getPets();
 
-if (loading) return <div>Loading...</div>
-return <div>{pets.map(pet => <PetCard key={pet.id} pet={pet} />)}</div>
+// Avoid ❌
+const response = await fetch('/api/pets');
+```
+
+### Error Handling
+
+```typescript
+try {
+  await petService.createPet(data);
+  alert('Success!');
+} catch (error) {
+  console.error('Error:', error);
+  alert('Failed. Please try again.');
+}
+```
+
+### Changing Colors
+
+Edit `src/index.css`:
+```css
+:root {
+  --primary-blue: #YOUR_COLOR;
+  /* Change any CSS variable */
+}
+```
+
+---
+
+## 🚀 Building for Production
+
+### Create Optimized Build
+```bash
+npm run build
+```
+
+Output goes to `build/` directory.
+
+### Deploy to Vercel
+```bash
+npx vercel
+```
+
+### Deploy to Netlify
+```bash
+npm run build
+# Upload build/ to Netlify Dashboard
+```
+
+### Deploy to AWS S3 + CloudFront
+```bash
+npm run build
+aws s3 sync build/ s3://your-bucket-name
+```
+
+---
+
+## 🧪 Testing
+
+### Run Tests
+```bash
+npm test
+```
+
+### Run Specific Test
+```bash
+npm test -- Dashboard.test.tsx
+```
+
+### Generate Coverage Report
+```bash
+npm test -- --coverage
 ```
 
 ---
@@ -623,6 +736,19 @@ return <div>{pets.map(pet => <PetCard key={pet.id} pet={pet} />)}</div>
 - [React Router Docs](https://reactrouter.com)
 - [Recharts Docs](https://recharts.org)
 - [Axios Docs](https://axios-http.com)
+
+---
+
+## ✅ Pre-Launch Checklist
+
+Before going live:
+- [ ] Backend API is deployed and running
+- [ ] `npm install` completed successfully
+- [ ] `.env` file exists with correct API_URL
+- [ ] Port 3000 is available
+- [ ] Manual testing completed (see Testing Guide above)
+- [ ] No errors in browser console
+- [ ] All pages load correctly
 
 ---
 

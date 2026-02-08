@@ -8,7 +8,6 @@ export const handler: APIGatewayProxyHandler = async (event): Promise<APIGateway
   console.log('--- [START] getAirQualityData Handler ---');
   
   try {
-    // 1. 验证 ZIP Code
     const zipCode = event.queryStringParameters?.zipCode;
     console.log(`[STEP 1] Received zipCode: ${zipCode}`);
 
@@ -21,7 +20,6 @@ export const handler: APIGatewayProxyHandler = async (event): Promise<APIGateway
       };
     }
 
-    // 2. Geocoding 获取坐标
     console.log(`[STEP 2] Calling Geocoding API for zipCode: ${zipCode}...`);
     const geocodingUrl = 'https://maps.googleapis.com/maps/api/geocode/json';
     const geocodingResponse = await axios.get(geocodingUrl, {
@@ -44,15 +42,12 @@ export const handler: APIGatewayProxyHandler = async (event): Promise<APIGateway
     const dateStr = new Date().toISOString().split('T')[0];
     console.log(`[STEP 3] Coordinates found: ${lat}, ${lng}. Date: ${dateStr}`);
 
-    // 3. 调用 Air Quality Service  
     console.log('[STEP 4] Entering airQualityService...');
     
-    // 显式等待 Promise
     const aqi = await getAirQuality(lat, lng, zipCode, dateStr);
 
     console.log(`[STEP 5] airQualityService finished. Result (AQI): ${aqi}`);
 
-    // 4. 返回响应
     return {
       statusCode: 200,
       headers: {

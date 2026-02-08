@@ -1,8 +1,3 @@
-// ============================================
-// AI Insights Page - MVP 5
-// Shows AI-generated insights and recommendations
-// ============================================
-
 import React, { useState, useEffect } from 'react';
 import { Sparkles, AlertCircle } from 'lucide-react';
 import { analysisService } from '../services/analysisService';
@@ -14,7 +9,6 @@ const AIInsights: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [petId, setPetId] = useState<number | null>(null);
 
-  // Get current pet ID
   useEffect(() => {
     const savedPetId = localStorage.getItem('selectedPetId');
     if (savedPetId) {
@@ -22,7 +16,6 @@ const AIInsights: React.FC = () => {
     }
   }, []);
 
-  // Fetch correlation data for insights
   const fetchInsights = async () => {
     if (!petId) {
       setError('Please select a pet first');
@@ -52,7 +45,6 @@ const AIInsights: React.FC = () => {
     }
   }, [petId]);
 
-  // If insufficient data
   if (data?.status === "insufficient_data") {
     return (
       <div className="ai-insights-page">
@@ -66,7 +58,6 @@ const AIInsights: React.FC = () => {
     );
   }
 
-  // If error
   if (error && !data) {
     return (
       <div className="ai-insights-page">
@@ -84,7 +75,6 @@ const AIInsights: React.FC = () => {
     );
   }
 
-  // Success state with insights
   if (data?.status === "success" && data.insights && data.correlations) {
     const insights = data.insights;
     const corr = data.correlations;
@@ -93,7 +83,6 @@ const AIInsights: React.FC = () => {
       <div className="ai-insights-page">
         <h2>AI-Generated Health Insights</h2>
 
-        {/* Key Insight */}
         <div className="key-insight" style={{
           backgroundColor: '#eff6ff',
           border: '2px solid #3b82f6',
@@ -112,7 +101,6 @@ const AIInsights: React.FC = () => {
           </div>
         </div>
 
-        {/* Pattern Detection */}
         <div className="insights-section" style={{
           backgroundColor: 'white',
           padding: '25px',
@@ -146,7 +134,6 @@ const AIInsights: React.FC = () => {
           </div>
         </div>
 
-        {/* Personalized Recommendations */}
         <div className="insights-section" style={{
           backgroundColor: 'white',
           padding: '25px',
@@ -178,7 +165,6 @@ const AIInsights: React.FC = () => {
           </div>
         </div>
 
-        {/* Trigger Info */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
@@ -233,7 +219,6 @@ const AIInsights: React.FC = () => {
     );
   }
 
-  // Loading state
   return (
     <div className="ai-insights-page">
       <h2>AI-Generated Health Insights</h2>

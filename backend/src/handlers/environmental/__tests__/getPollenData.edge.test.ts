@@ -96,7 +96,7 @@ describe('getPollenData - Edge Cases', () => {
               date: { year: 2026, month: 1, day: 24 },
               pollenTypeInfo: [
                 {
-                  code: 'GRAMINALES',  // ✅ FIXED
+                  code: 'GRAMINALES',  
                   displayName: 'Grass',
                   healthRecommendations: ['Test'],
                 },
@@ -128,7 +128,7 @@ describe('getPollenData - Edge Cases', () => {
               date: { year: 2026, month: 1, day: 24 },
               pollenTypeInfo: [
                 {
-                  code: 'GRAMINALES',  // ✅ FIXED
+                  code: 'GRAMINALES',  
                   displayName: 'Grass',
                   indexInfo: { value: 2 },
                 },
@@ -207,19 +207,19 @@ describe('getPollenData - Edge Cases', () => {
               date: { year: 2026, month: 1, day: 24 },
               pollenTypeInfo: [
                 {
-                  code: 'GRAMINALES',  // ✅ FIXED
+                  code: 'GRAMINALES',  
                   displayName: 'Grass',
                   indexInfo: { value: 0 },
                   healthRecommendations: [],
                 },
                 {
-                  code: 'BIRCH',  // ✅ FIXED
+                  code: 'BIRCH',  
                   displayName: 'Tree',
                   indexInfo: { value: 0 },
                   healthRecommendations: [],
                 },
                 {
-                  code: 'RAGWEED',  // ✅ FIXED
+                  code: 'RAGWEED',  
                   displayName: 'Weed',
                   indexInfo: { value: 0 },
                   healthRecommendations: [],
@@ -251,7 +251,7 @@ describe('getPollenData - Edge Cases', () => {
               date: { year: 2026, month: 1, day: 24 },
               pollenTypeInfo: [
                 {
-                  code: 'GRAMINALES',  // ✅ FIXED
+                  code: 'GRAMINALES',  
                   displayName: 'Grass',
                   indexInfo: { value: 5 },
                   healthRecommendations: ['Stay indoors'],
@@ -267,7 +267,7 @@ describe('getPollenData - Edge Cases', () => {
 
       expect(result.statusCode).toBe(200);
       const body = JSON.parse(result.body);
-      expect(body.forecast[0].pollenLevel).toBe('VERY_HIGH');  // ✅ Now should work!
+      expect(body.forecast[0].pollenLevel).toBe('VERY_HIGH'); 
       expect(body.forecast[0].grassPollen).toBe(5);
     });
 
@@ -284,13 +284,13 @@ describe('getPollenData - Edge Cases', () => {
               date: { year: 2026, month: 1, day: 24 },
               pollenTypeInfo: [
                 {
-                  code: 'GRAMINALES',  // ✅ FIXED
+                  code: 'GRAMINALES',  
                   displayName: 'Grass',
                   indexInfo: { value: 3 },
                   healthRecommendations: ['Stay indoors', 'Wear mask'],
                 },
                 {
-                  code: 'BIRCH',  // ✅ FIXED
+                  code: 'BIRCH',  
                   displayName: 'Tree',
                   indexInfo: { value: 3 },
                   healthRecommendations: ['Stay indoors', 'Take medication'],
@@ -311,7 +311,7 @@ describe('getPollenData - Edge Cases', () => {
       const stayIndoorsCount = recommendations.filter(
         (r: string) => r === 'Stay indoors'
       ).length;
-      expect(stayIndoorsCount).toBe(1);  // ✅ Now should work!
+      expect(stayIndoorsCount).toBe(1);  
       expect(recommendations).toHaveLength(3);
     });
   });

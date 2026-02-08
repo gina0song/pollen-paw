@@ -16,7 +16,7 @@ describe('createSymptom Handler', () => {
 
   it('should create symptom with valid data', async () => {
     mockQuery
-      .mockResolvedValueOnce(createMockResult([{ id: 1 }])) // Pet check
+      .mockResolvedValueOnce(createMockResult([{ id: 1 }])) 
       .mockResolvedValueOnce(createMockResult([{
         id: 11,
         pet_id: 1,

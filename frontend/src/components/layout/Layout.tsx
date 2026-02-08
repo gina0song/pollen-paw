@@ -1,12 +1,6 @@
-// ============================================
-// Layout Component
-// Main layout wrapper with header and navigation
-// ============================================
-
 import React from 'react';
 import Header from './Header';
 import Navigation from './Navigation';
-// Styles are imported in App.css
 
 interface LayoutProps {
   children: React.ReactNode;

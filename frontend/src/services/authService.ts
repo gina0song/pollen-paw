@@ -1,12 +1,10 @@
 import { api } from './api';
-// FIX: Using LoginRequest and RegisterRequest to match your types.ts
 import { AuthResponse, LoginRequest, RegisterRequest } from '../types';
 
 export const authService = {
   register: async (data: RegisterRequest): Promise<AuthResponse> => {
     try {
       const response = await api.post<any>('/auth/register', data);
-      // Backend pattern: if user exists but no token, try login
       if (response.id && !response.token) {
         return authService.login({ email: data.email, password: 'password_placeholder' });
       }

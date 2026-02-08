@@ -1,6 +1,3 @@
-// ============================================
-// DELETE /pets/{id} - Delete a pet profile
-// ============================================
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { query } from '../../services/db';
 

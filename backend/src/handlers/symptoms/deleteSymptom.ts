@@ -1,6 +1,3 @@
-// ============================================
-// DELETE /symptoms/{id} - Delete a symptom log
-// ============================================
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { query } from '../../services/db';
 
@@ -21,7 +18,6 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       };
     }
 
-    // ✅ FIXED: Get userId from query params
     let userId: any = event.queryStringParameters?.userId;
 
     if (!userId) {
@@ -38,7 +34,6 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     userId = parseInt(userId);
     console.log(`Deleting symptom ${symptomId} for user ${userId}`);
 
-    // Delete symptom log (verify ownership through pet)
     const result = await query(
       `DELETE FROM symptom_logs 
        WHERE id = $1 

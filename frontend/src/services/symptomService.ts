@@ -1,8 +1,3 @@
-// ============================================
-// Symptom Service - FINAL FIX VERSION
-// Handles all symptom-related API calls
-// ============================================
-
 import { api } from './api';
 import { SymptomLog } from '../types';
 import { authService } from './authService';
@@ -46,9 +41,7 @@ export const symptomService = {
     }
   },
 
-  /**
-   * Create a new symptom log
-   */
+
   createSymptom: async (data: CreateSymptomRequest): Promise<SymptomLog> => {
     try {
       const finalData = {
@@ -64,9 +57,6 @@ export const symptomService = {
     }
   },
 
-  /**
-   * Update an existing symptom log
-   */
   updateSymptom: async (id: number, data: Partial<CreateSymptomRequest>): Promise<SymptomLog> => {
     try {
       const response = await api.put<{ symptom: SymptomLog }>(`/symptoms/${id}`, data);
@@ -77,12 +67,9 @@ export const symptomService = {
     }
   },
 
-  /**
-   * Delete a symptom log - FINAL FIX VERSION
-   */
+
   deleteSymptom: async (id: number): Promise<void> => {
     try {
-      // ✅ FINAL FIX: Directly read from localStorage to ensure we get the userId
       const userStr = localStorage.getItem('user');
       
       if (!userStr) {
@@ -105,7 +92,6 @@ export const symptomService = {
 
       console.log(`🚀 Deleting symptom ${id} for user ${userId}`);
       
-      // ✅ Add userId as query parameter
       await api.delete(`/symptoms/${id}?userId=${userId}`);
       
       console.log(`✅ Symptom ${id} deleted successfully`);
@@ -115,22 +101,18 @@ export const symptomService = {
     }
   },
 
-  /**
-   * Upload photo for symptom
-   */
+
   uploadPhoto: async (file: File): Promise<string> => {
     try {
       console.log('Uploading photo:', file.name, file.type);
       
-      // ✅ Match backend expected field names
       const presignedResponse = await api.post<{ uploadUrl: string; photoUrl: string; key: string }>('/upload', {
-        fileName: file.name,     // Backend expects 'fileName' not 'filename'
-        fileType: file.type,     // Backend expects 'fileType' not 'contentType'
+        fileName: file.name,   
+        fileType: file.type,    
       });
 
       console.log('Got presigned URL:', presignedResponse.uploadUrl);
 
-      // Upload file to S3 using presigned URL
       const uploadResult = await fetch(presignedResponse.uploadUrl, {
         method: 'PUT',
         body: file,
@@ -145,7 +127,6 @@ export const symptomService = {
 
       console.log('Photo uploaded successfully:', presignedResponse.photoUrl);
 
-      // ✅ Return photoUrl instead of key
       return presignedResponse.photoUrl;
     } catch (error: any) {
       console.error('Upload photo error:', error);

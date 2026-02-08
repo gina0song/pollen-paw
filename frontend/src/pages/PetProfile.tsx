@@ -1,7 +1,3 @@
-// ============================================
-// Pet Profile Page - With Memorial Account Feature
-// ============================================
-
 import React, { useState, useEffect } from 'react';
 import { Plus, Save, Trash2 } from 'lucide-react';
 import { petService } from '../services/petService';
@@ -18,7 +14,6 @@ const PetProfile: React.FC = () => {
   const [petAge, setPetAge] = useState('');
   const [petBreed, setPetBreed] = useState('');
   const [memorialPets, setMemorialPets] = useState<Set<number>>(() => {
-    // ✅ Load from localStorage on init
     const saved = localStorage.getItem('memorialPets');
     return saved ? new Set(JSON.parse(saved)) : new Set();
   });
@@ -134,7 +129,6 @@ const PetProfile: React.FC = () => {
     }
   };
 
-  // ✅ NEW: Handle memorial account toggle with localStorage persistence
   const handleToggleMemorial = (petId: number) => {
     setMemorialPets(prev => {
       const newSet = new Set(prev);
@@ -143,7 +137,6 @@ const PetProfile: React.FC = () => {
       } else {
         newSet.add(petId);
       }
-      // ✅ Save to localStorage
       localStorage.setItem('memorialPets', JSON.stringify(Array.from(newSet)));
       return newSet;
     });
@@ -209,11 +202,11 @@ const PetProfile: React.FC = () => {
                   position: 'relative',
                   boxShadow: selectedPet?.id === pet.id ? '0 4px 12px rgba(0,0,0,0.15)' : '0 1px 2px rgba(0,0,0,0.05)',
                   transform: selectedPet?.id === pet.id ? 'scale(1.05)' : 'scale(1)',
-                  // ✅ MEMORIAL: Grayscale + reduced opacity if memorial
+                  // MEMORIAL: Grayscale + reduced opacity if memorial
                   filter: memorialPets.has(pet.id) ? 'grayscale(100%) opacity(0.7)' : 'none',
                 }}
               >
-                {/* ✅ MEMORIAL ICON: Purple heart (💜) */}
+                {/* MEMORIAL ICON: Purple heart (💜) */}
                 {memorialPets.has(pet.id) && (
                   <div
                     style={{
@@ -299,7 +292,7 @@ const PetProfile: React.FC = () => {
           {selectedPet ? `Editing: ${selectedPet.name}${isCurrentPetMemorial ? ' (Memorial Account)' : ''}` : 'Add New Pet'}
         </h3>
         
-        {/* ✅ MEMORIAL NOTICE: Show if this pet is memorial */}
+        {/* MEMORIAL NOTICE: Show if this pet is memorial */}
         {isCurrentPetMemorial && (
           <div style={{
             backgroundColor: '#f3e8ff',
@@ -475,7 +468,7 @@ const PetProfile: React.FC = () => {
             </button>
           )}
 
-          {/* ✅ NEW: Memorial Toggle Button */}
+          {/* Memorial Toggle Button */}
           {selectedPet && (
             <button
               onClick={() => handleToggleMemorial(selectedPet.id)}

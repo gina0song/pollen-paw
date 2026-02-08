@@ -1,8 +1,3 @@
-// ============================================
-// Analysis Service
-// Handles correlation analysis API calls
-// ============================================
-
 import { api } from './api';
 import { CorrelationResponse } from '../types';
 

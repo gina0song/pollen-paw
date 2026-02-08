@@ -14,7 +14,6 @@ const Login: React.FC = () => {
 
     try {
       setLoading(true);
-      // FIX: Added required password field to match LoginRequest interface
       await authService.login({ 
         email, 
         password: 'simulated_password' 

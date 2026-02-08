@@ -83,9 +83,8 @@ describe('getPollenData - Mock API Tests', () => {
       const event = createMockEvent('98074');
       await handler(event);
 
-      // Just verify axios.get was called - the exact matching is tricky due to URL encoding
       expect(mockedAxios.get).toHaveBeenCalled();
-      expect(mockedAxios.get).toHaveBeenCalledTimes(2); // Geocoding + Pollen
+      expect(mockedAxios.get).toHaveBeenCalledTimes(2); 
     });
 
     it('should return 200 with properly formatted data', async () => {
@@ -146,19 +145,19 @@ describe('getPollenData - Mock API Tests', () => {
               date: { year: 2026, month: 1, day: 24 },
               pollenTypeInfo: [
                 {
-                  code: 'GRAMINALES',  // ✅ FIXED: Use plant code, not pollen type
+                  code: 'GRAMINALES',
                   displayName: 'Grass',
                   indexInfo: { value: 3 },
                   healthRecommendations: ['Wear sunglasses outdoors'],
                 },
                 {
-                  code: 'BIRCH',  // ✅ FIXED: Use plant code, not pollen type
+                  code: 'BIRCH',
                   displayName: 'Tree',
                   indexInfo: { value: 2 },
                   healthRecommendations: ['Close windows at night'],
                 },
                 {
-                  code: 'RAGWEED',  // ✅ FIXED: Use plant code, not pollen type
+                  code: 'RAGWEED', 
                   displayName: 'Weed',
                   indexInfo: { value: 1 },
                   healthRecommendations: [],
@@ -177,9 +176,9 @@ describe('getPollenData - Mock API Tests', () => {
       const firstDay = body.forecast[0];
 
       expect(firstDay.date).toBe('2026-01-24');
-      expect(firstDay.grassPollen).toBe(3);  // ✅ Now should work!
-      expect(firstDay.treePollen).toBe(2);   // ✅ Now should work!
-      expect(firstDay.weedPollen).toBe(1);   // ✅ Now should work!
+      expect(firstDay.grassPollen).toBe(3);  
+      expect(firstDay.treePollen).toBe(2);   
+      expect(firstDay.weedPollen).toBe(1);   
       expect(firstDay.pollenLevel).toBe('HIGH');
     });
 
@@ -204,19 +203,19 @@ describe('getPollenData - Mock API Tests', () => {
               date: { year: 2026, month: 1, day: 24 },
               pollenTypeInfo: [
                 {
-                  code: 'GRAMINALES',  // ✅ FIXED
+                  code: 'GRAMINALES',  
                   displayName: 'Grass',
                   indexInfo: { value: 3 },
                   healthRecommendations: ['Wear sunglasses outdoors'],
                 },
                 {
-                  code: 'BIRCH',  // ✅ FIXED
+                  code: 'BIRCH',  
                   displayName: 'Tree',
                   indexInfo: { value: 2 },
                   healthRecommendations: ['Close windows at night'],
                 },
                 {
-                  code: 'RAGWEED',  // ✅ FIXED
+                  code: 'RAGWEED',  
                   displayName: 'Weed',
                   indexInfo: { value: 1 },
                   healthRecommendations: [],
@@ -227,19 +226,19 @@ describe('getPollenData - Mock API Tests', () => {
               date: { year: 2026, month: 1, day: 25 },
               pollenTypeInfo: [
                 {
-                  code: 'GRAMINALES',  // ✅ FIXED
+                  code: 'GRAMINALES',  
                   displayName: 'Grass',
                   indexInfo: { value: 4 },
                   healthRecommendations: ['Stay indoors if possible'],
                 },
                 {
-                  code: 'BIRCH',  // ✅ FIXED
+                  code: 'BIRCH',  
                   displayName: 'Tree',
                   indexInfo: { value: 3 },
                   healthRecommendations: ['Take allergy medication'],
                 },
                 {
-                  code: 'RAGWEED',  // ✅ FIXED
+                  code: 'RAGWEED',  
                   displayName: 'Weed',
                   indexInfo: { value: 2 },
                   healthRecommendations: [],
@@ -257,7 +256,7 @@ describe('getPollenData - Mock API Tests', () => {
       const body = JSON.parse(result.body);
       const secondDay = body.forecast[1];
 
-      expect(secondDay.pollenLevel).toBe('VERY_HIGH');  // ✅ Now should work!
+      expect(secondDay.pollenLevel).toBe('VERY_HIGH');  
       expect(secondDay.grassPollen).toBe(4);
     });
 
@@ -282,19 +281,19 @@ describe('getPollenData - Mock API Tests', () => {
               date: { year: 2026, month: 1, day: 24 },
               pollenTypeInfo: [
                 {
-                  code: 'GRAMINALES',  // ✅ FIXED
+                  code: 'GRAMINALES',  
                   displayName: 'Grass',
                   indexInfo: { value: 3 },
                   healthRecommendations: ['Wear sunglasses outdoors'],
                 },
                 {
-                  code: 'BIRCH',  // ✅ FIXED
+                  code: 'BIRCH',  
                   displayName: 'Tree',
                   indexInfo: { value: 2 },
                   healthRecommendations: ['Close windows at night'],
                 },
                 {
-                  code: 'RAGWEED',  // ✅ FIXED
+                  code: 'RAGWEED',  
                   displayName: 'Weed',
                   indexInfo: { value: 1 },
                   healthRecommendations: [],
@@ -305,19 +304,19 @@ describe('getPollenData - Mock API Tests', () => {
               date: { year: 2026, month: 1, day: 25 },
               pollenTypeInfo: [
                 {
-                  code: 'GRAMINALES',  // ✅ FIXED
+                  code: 'GRAMINALES',  
                   displayName: 'Grass',
                   indexInfo: { value: 4 },
                   healthRecommendations: ['Stay indoors if possible'],
                 },
                 {
-                  code: 'BIRCH',  // ✅ FIXED
+                  code: 'BIRCH',  
                   displayName: 'Tree',
                   indexInfo: { value: 3 },
                   healthRecommendations: ['Take allergy medication'],
                 },
                 {
-                  code: 'RAGWEED',  // ✅ FIXED
+                  code: 'RAGWEED', 
                   displayName: 'Weed',
                   indexInfo: { value: 2 },
                   healthRecommendations: [],
@@ -335,7 +334,7 @@ describe('getPollenData - Mock API Tests', () => {
       const body = JSON.parse(result.body);
       const secondDay = body.forecast[1];
 
-      expect(secondDay.healthRecommendations).toContain('Stay indoors if possible');  // ✅ Now should work!
+      expect(secondDay.healthRecommendations).toContain('Stay indoors if possible'); 
       expect(secondDay.healthRecommendations).toContain('Take allergy medication');
     });
   });

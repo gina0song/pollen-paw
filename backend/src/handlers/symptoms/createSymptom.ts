@@ -78,7 +78,6 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     const zipCode = petOwnerInfo.rows[0].zip_code;
     const logDate = symptomData.log_date || new Date().toISOString().split('T')[0];
 
-    // 3. 环境数据自动抓取
     try {
       const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${zipCode}&key=${GOOGLE_MAPS_API_KEY}`;
       const geoRes = await axios.get(geocodeUrl);
@@ -93,7 +92,6 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       console.error('[SYNC ERROR] Environmental sync failed:', envError);
     }
 
-    // 4. 插入数据库 (持久化)
     const result = await query(
       `INSERT INTO symptom_logs
        (pet_id, zip_code, log_date, eye_symptoms, fur_quality, skin_irritation, respiratory, notes, photo_url)

@@ -2,7 +2,6 @@ import { APIGatewayProxyEvent } from 'aws-lambda';
 import { handler } from '../getPollenData';
 
 describe('getPollenData - Basic Input Validation', () => {
-  // Helper function to create mock events
   const createMockEvent = (
     queryStringParameters: Record<string, string> | null
   ): APIGatewayProxyEvent => {
@@ -57,7 +56,6 @@ describe('getPollenData - Basic Input Validation', () => {
   describe('Response Structure', () => {
     it('should return JSON content type header', async () => {
       const event = createMockEvent({ zipCode: '98074' });
-      // This will fail without mocking, but tests the error handling
       const result = await handler(event);
 
       expect(result.headers?.['Content-Type']).toBe('application/json');

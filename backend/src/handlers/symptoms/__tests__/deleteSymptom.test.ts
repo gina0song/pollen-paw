@@ -23,10 +23,9 @@ describe('deleteSymptom Handler', () => {
   it('should successfully delete a log belonging to the authorized user', async () => {
     mockQuery.mockResolvedValueOnce(createMockResult([{ id: 10 }]));
 
-    // ✅ FIX: userId should come from queryStringParameters, not requestContext
     const event = {
       pathParameters: { id: '10' },
-      queryStringParameters: { userId: '1' },  // ✅ CHANGED HERE
+      queryStringParameters: { userId: '1' },  
       requestContext: {
         requestId: 'test-id',
       },
@@ -43,10 +42,9 @@ describe('deleteSymptom Handler', () => {
   it('should return 404 if log ID does not exist for that user', async () => {
     mockQuery.mockResolvedValueOnce(createMockResult([]));
 
-    // ✅ FIX: userId should come from queryStringParameters
     const event = {
       pathParameters: { id: '999' },
-      queryStringParameters: { userId: '1' },  // ✅ CHANGED HERE
+      queryStringParameters: { userId: '1' },  
       requestContext: {
         requestId: 'test-id',
       },
